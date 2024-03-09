@@ -1,41 +1,39 @@
 package com.example.spotifywrapped;
 
+import static android.content.ContentValues.TAG;
+
+import static com.example.spotifywrapped.pullSpotifyDataToDatabase.*;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.Intent;
-import android.net.Uri;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.spotify.sdk.android.auth.AuthorizationClient;
-import com.spotify.sdk.android.auth.AuthorizationRequest;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
-
-    public static final String CLIENT_ID = "628ea4720df744c981eaa390fba4132e";
-    public static final String REDIRECT_URI = "spotifywrapped://auth";
-
-    public static final int AUTH_TOKEN_REQUEST_CODE = 0;
-    public static final int AUTH_CODE_REQUEST_CODE = 1;
-
-    private final OkHttpClient mOkHttpClient = new OkHttpClient();
     private String mAccessToken, mAccessCode;
-    private Call mCall;
-
     private TextView tokenTextView, codeTextView, profileTextView;
 
     @Override
@@ -56,41 +54,17 @@ public class MainActivity extends AppCompatActivity {
         // Set the click listeners for the buttons
 
         tokenBtn.setOnClickListener((v) -> {
-            getToken();
+            getToken(MainActivity.this);
         });
 
         codeBtn.setOnClickListener((v) -> {
-            getCode();
+            getCode(MainActivity.this);
         });
 
         profileBtn.setOnClickListener((v) -> {
             onGetUserProfileClicked();
         });
-
     }
-
-    /**
-     * Get token from Spotify
-     * This method will open the Spotify login activity and get the token
-     * What is token?
-     * https://developer.spotify.com/documentation/general/guides/authorization-guide/
-     */
-    public void getToken() {
-        final AuthorizationRequest request = getAuthenticationRequest(AuthorizationResponse.Type.TOKEN);
-        AuthorizationClient.openLoginActivity(MainActivity.this, AUTH_TOKEN_REQUEST_CODE, request);
-    }
-
-    /**
-     * Get code from Spotify
-     * This method will open the Spotify login activity and get the code
-     * What is code?
-     * https://developer.spotify.com/documentation/general/guides/authorization-guide/
-     */
-    public void getCode() {
-        final AuthorizationRequest request = getAuthenticationRequest(AuthorizationResponse.Type.CODE);
-        AuthorizationClient.openLoginActivity(MainActivity.this, AUTH_CODE_REQUEST_CODE, request);
-    }
-
 
     /**
      * When the app leaves this activity to momentarily get a token/code, this function
@@ -99,16 +73,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        final AuthorizationResponse response = AuthorizationClient.getResponse(resultCode, data);
+        // Call the method from pullSpotifyDataToDatabase to retrieve the authorization response
+        AuthorizationResponse response = pullSpotifyDataToDatabase.getSpotifyAuthResponse(resultCode, data);
 
         // Check which request code is present (if any)
-        if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
-            mAccessToken = response.getAccessToken();
-            setTextAsync(mAccessToken, tokenTextView);
+        if (response != null) {
+            if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
+                mAccessToken = response.getAccessToken();
+                setTextAsync(mAccessToken, tokenTextView);
 
-        } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
-            mAccessCode = response.getCode();
-            setTextAsync(mAccessCode, codeTextView);
+            } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
+                mAccessCode = response.getCode();
+                setTextAsync(mAccessCode, codeTextView);
+            }
         }
     }
 
@@ -128,6 +105,10 @@ public class MainActivity extends AppCompatActivity {
                 .addHeader("Authorization", "Bearer " + mAccessToken)
                 .build();
 
+        final Request top10Artists = new Request.Builder()
+                .url("https://api.spotify.com/v1/me/top/artists?limit=10")
+                .addHeader("Authorization", "Bearer " + mAccessToken)
+                .build();
         cancelCall();
         mCall = mOkHttpClient.newCall(request);
 
@@ -143,7 +124,32 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 try {
                     final JSONObject jsonObject = new JSONObject(response.body().string());
-                    setTextAsync(jsonObject.toString(3), profileTextView);
+                    String displayName = jsonObject.getString("display_name");
+                    String userId = jsonObject.getString("id");
+                    //JSONArray userProfileImageArray = jsonObject.getJSONArray("images");
+                    //String userProfileImageURL = userProfileImageArray.getJSONObject(0).getString("url");
+                    setTextAsync(displayName, profileTextView);
+
+
+                    Map<String, Object> user = new HashMap<>();
+                    user.put("displayName", displayName);
+                    user.put("id", userId);
+                    //user.put("profilePic", userProfileImageURL);
+                    db.collection("users")
+                            .add(user)
+                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                @Override
+                                public void onSuccess(DocumentReference documentReference) {
+                                    Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error adding document", e);
+                                }
+                            });
+
                 } catch (JSONException e) {
                     Log.d("JSON", "Failed to parse data: " + e);
                     Toast.makeText(MainActivity.this, "Failed to parse data, watch Logcat for more details",
@@ -162,35 +168,6 @@ public class MainActivity extends AppCompatActivity {
      */
     private void setTextAsync(final String text, TextView textView) {
         runOnUiThread(() -> textView.setText(text));
-    }
-
-    /**
-     * Get authentication request
-     *
-     * @param type the type of the request
-     * @return the authentication request
-     */
-    private AuthorizationRequest getAuthenticationRequest(AuthorizationResponse.Type type) {
-        return new AuthorizationRequest.Builder(CLIENT_ID, type, getRedirectUri().toString())
-                .setShowDialog(false)
-                .setScopes(new String[] { "user-read-email" }) // <--- Change the scope of your requested token here
-                .setCampaign("your-campaign-token")
-                .build();
-    }
-
-    /**
-     * Gets the redirect Uri for Spotify
-     *
-     * @return redirect Uri object
-     */
-    private Uri getRedirectUri() {
-        return Uri.parse(REDIRECT_URI);
-    }
-
-    private void cancelCall() {
-        if (mCall != null) {
-            mCall.cancel();
-        }
     }
 
     @Override
