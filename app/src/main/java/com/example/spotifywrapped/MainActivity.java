@@ -112,11 +112,6 @@ public class MainActivity extends AppCompatActivity {
                 .url("https://api.spotify.com/v1/me")
                 .addHeader("Authorization", "Bearer " + mAccessToken)
                 .build();
-
-        final Request top10Artists = new Request.Builder()
-                .url("https://api.spotify.com/v1/me/top/artists?limit=10")
-                .addHeader("Authorization", "Bearer " + mAccessToken)
-                .build();
         cancelCall();
         mCall = mOkHttpClient.newCall(request);
 
