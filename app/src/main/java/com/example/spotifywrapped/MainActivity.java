@@ -3,6 +3,7 @@ package com.example.spotifywrapped;
 import static android.content.ContentValues.TAG;
 
 import static com.example.spotifywrapped.pullSpotifyDataToDatabase.*;
+import static com.example.spotifywrapped.top10Artists.fetchTop10Artist;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,7 +16,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
 
@@ -25,16 +27,22 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
-    private String mAccessToken, mAccessCode;
+    public static String mAccessToken, mAccessCode;
     private TextView tokenTextView, codeTextView, profileTextView;
+    public static final OkHttpClient mOkHttpClient = new OkHttpClient();
+    private FirebaseAuth firebaseAuth;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,28 +133,33 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     final JSONObject jsonObject = new JSONObject(response.body().string());
                     String displayName = jsonObject.getString("display_name");
-                    String userId = jsonObject.getString("id");
+                    String spotifyUserId = jsonObject.getString("id");
                     //JSONArray userProfileImageArray = jsonObject.getJSONArray("images");
                     //String userProfileImageURL = userProfileImageArray.getJSONObject(0).getString("url");
                     setTextAsync(displayName, profileTextView);
 
-
+                    List<top10Artists> parsedData = fetchTop10Artist(mAccessToken,mOkHttpClient);
                     Map<String, Object> user = new HashMap<>();
                     user.put("displayName", displayName);
-                    user.put("id", userId);
+                    user.put("spotifyId", spotifyUserId);
+                    user.put("Artists10", parsedData);
                     //user.put("profilePic", userProfileImageURL);
-                    db.collection("users")
-                            .add(user)
-                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    firebaseAuth = FirebaseAuth.getInstance();
+                    FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+                    String userID = currentUser.getUid();
+
+                    db.collection("users").document(userID)
+                            .update(user)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
-                                public void onSuccess(DocumentReference documentReference) {
-                                    Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "DocumentSnapshot added with ID: " + userID);
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    Log.w(TAG, "Error adding document", e);
+                                    Log.w(TAG, "Error updating document", e);
                                 }
                             });
 

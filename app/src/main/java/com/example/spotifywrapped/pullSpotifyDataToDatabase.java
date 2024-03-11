@@ -1,7 +1,6 @@
 package com.example.spotifywrapped;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
@@ -11,15 +10,12 @@ import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
 import okhttp3.Call;
-import okhttp3.OkHttpClient;
-
 public class pullSpotifyDataToDatabase {
     public static final String CLIENT_ID = "628ea4720df744c981eaa390fba4132e";
     public static final String REDIRECT_URI = "spotifywrapped://auth";
     public static final FirebaseFirestore db = FirebaseFirestore.getInstance();
     public static final int AUTH_TOKEN_REQUEST_CODE = 0;
     public static final int AUTH_CODE_REQUEST_CODE = 1;
-    public static final OkHttpClient mOkHttpClient = new OkHttpClient();
     public static Call mCall;
 
 
