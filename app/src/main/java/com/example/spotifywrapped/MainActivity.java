@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.Intent;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
@@ -124,6 +125,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    Looper.prepare();
+                } catch (Exception e) {
+                    Log.d("Looper", "Looper already prepared: " + e);
+                }
                 try {
                     final JSONObject jsonObject = new JSONObject(response.body().string());
                     String displayName = jsonObject.getString("display_name");
