@@ -1,5 +1,6 @@
 package com.example.spotifywrapped;
 
+import static com.example.spotifywrapped.MainActivity.*;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -44,9 +45,14 @@ public class LoginActivity extends AppCompatActivity {
         }
         firebaseAuth.signInWithEmailAndPassword(username, password).addOnCompleteListener(this, task -> {
             if (task.isSuccessful()) {
+                // move "request token" "request code" and "get user profile" functionality to this button in that order.
                 Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
+                // add code here:
+
+
+
                 finish();
             } else {
                 Toast.makeText(this, "Login Failed.", Toast.LENGTH_SHORT).show();
