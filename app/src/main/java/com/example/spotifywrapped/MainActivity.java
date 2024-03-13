@@ -21,7 +21,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
