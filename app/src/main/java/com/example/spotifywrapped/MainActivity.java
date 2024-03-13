@@ -9,7 +9,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.Intent;
+import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -125,6 +127,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 try {
+                    Looper.prepare();
+                } catch (Exception e) {
+                    Log.d("Looper", "Looper already prepared: " + e);
+                }
+                try {
                     final JSONObject jsonObject = new JSONObject(response.body().string());
                     String displayName = jsonObject.getString("display_name");
                     String spotifyUserId = jsonObject.getString("id");
@@ -176,7 +183,10 @@ public class MainActivity extends AppCompatActivity {
     private void setTextAsync(final String text, TextView textView) {
         runOnUiThread(() -> textView.setText(text));
     }
-
+    public void settings_btn_click(View view) {
+        startActivity(new Intent(this, SettingsPage.class));
+        finish();
+    }
     @Override
     protected void onDestroy() {
         cancelCall();
