@@ -12,6 +12,15 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <Button
+            android:id="@+id/settings_btn"
+            android:layout_gravity="right"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="Settings"
+            android:layout_marginRight="8dp"
+            android:onClick="settings_btn_click" />
+
         <TextView
             android:id="@+id/token_text_view"
             android:layout_width="match_parent"
