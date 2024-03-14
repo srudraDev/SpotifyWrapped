@@ -35,8 +35,11 @@ public class SettingsPage extends AppCompatActivity {
         finish();
     }
 
-    /*
     public void edit_account_button(View view) {
         startActivity(new Intent(this, EditAccountInformation.class));
-    } */
+    }
+
+    public void change_color_mode(View view) {
+
+    }
 }
