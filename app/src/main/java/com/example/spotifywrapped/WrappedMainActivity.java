@@ -33,17 +33,17 @@ public class WrappedMainActivity extends AppCompatActivity {
         setContentView(R.layout.wrapped_main);
 
         // Initialize UI elements
-        displayNameTextView = findViewById(R.id.display_name_text_view);
-        topArtistsRecyclerView = findViewById(R.id.top_artists_recycler_view);
+        //displayNameTextView = findViewById(R.id.display_name_text_view);
+        //topArtistsRecyclerView = findViewById(R.id.top_artists_recycler_view);
         // Initialize other UI elements
-
+        db = FirebaseFirestore.getInstance();
         // Retrieve data from Firebase
         retrieveUserDataFromFirebase();
     }
 
     private void retrieveUserDataFromFirebase() {
 // Assuming the top artists are stored in a "topArtists" collection in Firestore
-        db.collection("topArtists")
+        db.collection("Artists10")
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
