@@ -7,7 +7,11 @@ import static com.example.spotifywrapped.top10Artists.fetchTop10Artist;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.os.Bundle;
+import android.graphics.Color;
 import android.content.Intent;
 import android.os.Looper;
 import android.util.Log;
@@ -20,13 +24,16 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,10 +46,14 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
     public static String mAccessToken, mAccessCode;
-    private TextView tokenTextView, codeTextView, profileTextView;
     public static final OkHttpClient mOkHttpClient = new OkHttpClient();
     private FirebaseAuth firebaseAuth;
-
+    private FirebaseFirestore db;
+    private RecyclerView recyclerView;
+    private ArtistAdapter artistAdapter;
+    private List<Artist> artistList;
+    private boolean isProfileBtnClicked = false;
+    private Button profileBtn;
 
 
     @Override
@@ -50,36 +61,40 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize the views
-        tokenTextView = (TextView) findViewById(R.id.token_text_view);
-        codeTextView = (TextView) findViewById(R.id.code_text_view);
-        profileTextView = (TextView) findViewById(R.id.response_text_view);
+        profileBtn = (Button) findViewById(R.id.profile_btn);
 
-        // Initialize the buttons
-        Button tokenBtn = (Button) findViewById(R.id.token_btn);
-        Button codeBtn = (Button) findViewById(R.id.code_btn);
-        Button profileBtn = (Button) findViewById(R.id.profile_btn);
+        // Initialize FireStore
+        db = FirebaseFirestore.getInstance();
+
+        // RecyclerView
+        recyclerView = findViewById(R.id.recycler_view_top_artists);
+        artistList = new ArrayList<>();
+        artistAdapter = new ArtistAdapter(artistList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(artistAdapter);
 
         // Set the click listeners for the buttons
 
-        tokenBtn.setOnClickListener((v) -> {
-            getToken(MainActivity.this);
+        profileBtn.setOnClickListener(v -> {
+            profileBtn.setBackgroundColor(Color.TRANSPARENT);
+            isProfileBtnClicked = true;
+            getUserProfile();
         });
-
-        codeBtn.setOnClickListener((v) -> {
-            getCode(MainActivity.this);
-        });
-
-        profileBtn.setOnClickListener((v) -> {
-            onGetUserProfileClicked();
-        });
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Check if profileBtn is clicked
+        if (isProfileBtnClicked) {
+            // Hide profileBtn
+            profileBtn.setVisibility(View.INVISIBLE);
+        }
     }
 
     /**
      * When the app leaves this activity to momentarily get a token/code, this function
      * fetches the result of that external activity to get the response from Spotify
      */
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // Call the method from pullSpotifyDataToDatabase to retrieve the authorization response
@@ -89,11 +104,9 @@ public class MainActivity extends AppCompatActivity {
         if (response != null) {
             if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
                 mAccessToken = response.getAccessToken();
-                setTextAsync(mAccessToken, tokenTextView);
 
             } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
                 mAccessCode = response.getCode();
-                setTextAsync(mAccessCode, codeTextView);
             }
         }
     }
@@ -102,7 +115,11 @@ public class MainActivity extends AppCompatActivity {
      * Get user profile
      * This method will get the user profile using the token
      */
-    public void onGetUserProfileClicked() {
+    public void getUserProfile() {
+
+        getToken(this);
+        getCode(MainActivity.this);
+
         if (mAccessToken == null) {
             Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
             return;
@@ -135,16 +152,22 @@ public class MainActivity extends AppCompatActivity {
                     final JSONObject jsonObject = new JSONObject(response.body().string());
                     String displayName = jsonObject.getString("display_name");
                     String spotifyUserId = jsonObject.getString("id");
-                    //JSONArray userProfileImageArray = jsonObject.getJSONArray("images");
-                    //String userProfileImageURL = userProfileImageArray.getJSONObject(0).getString("url");
-                    setTextAsync(displayName, profileTextView);
+                    String userProfileImageURL;
+                    try {
+                        JSONArray userProfileImageArray = jsonObject.getJSONArray("images");
+                        userProfileImageURL = userProfileImageArray.getJSONObject(0).getString("url");
+                    } catch (Exception e) {
+                        userProfileImageURL = "@drawable/ic_default_profile_image"; //a default user profile image
+                        Log.d("ProfileImageError", "No Profile Image Found");
+                    }
+
 
                     List<top10Artists> parsedData = fetchTop10Artist(mAccessToken,mOkHttpClient);
                     Map<String, Object> user = new HashMap<>();
                     user.put("displayName", displayName);
                     user.put("spotifyId", spotifyUserId);
                     user.put("Artists10", parsedData);
-                    //user.put("profilePic", userProfileImageURL);
+                    user.put("profilePic", userProfileImageURL);
                     firebaseAuth = FirebaseAuth.getInstance();
                     FirebaseUser currentUser = firebaseAuth.getCurrentUser();
                     String userID = currentUser.getUid();
