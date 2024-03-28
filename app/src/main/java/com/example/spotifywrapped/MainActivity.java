@@ -66,17 +66,13 @@ public class MainActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         // RecyclerView
-        recyclerView = findViewById(R.id.recycler_view_top_artists);
         artistList = new ArrayList<top10Artists>();
         artistAdapter = new ArtistAdapter(artistList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(artistAdapter);
+        initiateRecyclerView(recyclerView);
+
 
         // Set the click listeners for the buttons
-        profileBtn.setEnabled(false);
-        profileBtn.setVisibility(View.INVISIBLE);
-        profileBtn.setClickable(false);
-        profileBtn.setFocusable(false);
+        hide(profileBtn);
 
         linkSpotifyBtn.setOnClickListener(v -> {
             // Call getToken() to link Spotify
@@ -91,10 +87,7 @@ public class MainActivity extends AppCompatActivity {
             profileBtn.setFocusable(true);
             // Disable linkSpotifyButton
             linkSpotifyBtn.setBackgroundColor(Color.TRANSPARENT);
-            linkSpotifyBtn.setEnabled(false);
-            linkSpotifyBtn.setVisibility(View.INVISIBLE);
-            linkSpotifyBtn.setClickable(false);
-            linkSpotifyBtn.setFocusable(false);
+            hide(linkSpotifyBtn);
             Log.d("Link Spotify Successful", "Linked to Spotify Account Successfully");
         });
 
@@ -227,6 +220,19 @@ public class MainActivity extends AppCompatActivity {
         // Notify adapter about data change
         artistAdapter.notifyDataSetChanged();
     }
+
+    public void hide(Button button) {
+        button.setEnabled(false);
+        button.setVisibility(View.INVISIBLE);
+        button.setClickable(false);
+        button.setFocusable(false);
+    }
+    public void initiateRecyclerView(RecyclerView rv) {
+        recyclerView = findViewById(R.id.recycler_view_top_artists);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(artistAdapter);
+    }
+
     public void settings_btn_click(View view) {
         startActivity(new Intent(this, SettingsPage.class));
         finish();
