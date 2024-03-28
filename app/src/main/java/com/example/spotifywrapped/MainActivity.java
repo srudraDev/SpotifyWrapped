@@ -5,7 +5,6 @@ import static android.content.ContentValues.TAG;
 import static com.example.spotifywrapped.pullSpotifyDataToDatabase.*;
 import static com.example.spotifywrapped.top10Artists.fetchTop10Artist;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,8 +19,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -51,9 +48,10 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private RecyclerView recyclerView;
     private ArtistAdapter artistAdapter;
-    private List<Artist> artistList;
+    private List<top10Artists> artistList;
     private boolean isProfileBtnClicked = false;
     private Button profileBtn;
+    private Button linkSpotifyBtn;
 
 
     @Override
@@ -62,23 +60,50 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         profileBtn = (Button) findViewById(R.id.profile_btn);
+        linkSpotifyBtn = (Button) findViewById(R.id.link_spotify_btn);
 
         // Initialize FireStore
         db = FirebaseFirestore.getInstance();
 
         // RecyclerView
         recyclerView = findViewById(R.id.recycler_view_top_artists);
-        artistList = new ArrayList<>();
+        artistList = new ArrayList<top10Artists>();
         artistAdapter = new ArtistAdapter(artistList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(artistAdapter);
 
         // Set the click listeners for the buttons
+        profileBtn.setEnabled(false);
+        profileBtn.setVisibility(View.INVISIBLE);
+        profileBtn.setClickable(false);
+        profileBtn.setFocusable(false);
+
+        linkSpotifyBtn.setOnClickListener(v -> {
+            // Call getToken() to link Spotify
+            Log.d("Token", "Getting token");
+            getToken(MainActivity.this);
+            Log.d("Token Done", "Got Token");
+            // enable Load Profile button
+            profileBtn.setEnabled(true);
+            // Reveal the Load Profile button
+            profileBtn.setVisibility(View.VISIBLE);
+            profileBtn.setClickable(true);
+            profileBtn.setFocusable(true);
+            // Disable linkSpotifyButton
+            linkSpotifyBtn.setBackgroundColor(Color.TRANSPARENT);
+            linkSpotifyBtn.setEnabled(false);
+            linkSpotifyBtn.setVisibility(View.INVISIBLE);
+            linkSpotifyBtn.setClickable(false);
+            linkSpotifyBtn.setFocusable(false);
+            Log.d("Link Spotify Successful", "Linked to Spotify Account Successfully");
+        });
 
         profileBtn.setOnClickListener(v -> {
+            Log.d("Profile", "Profile button has been clicked");
             profileBtn.setBackgroundColor(Color.TRANSPARENT);
             isProfileBtnClicked = true;
             getUserProfile();
+            profileBtn.setEnabled(false);
         });
     }
     @Override
@@ -86,8 +111,9 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         // Check if profileBtn is clicked
         if (isProfileBtnClicked) {
-            // Hide profileBtn
+            // Hide profileBtn and linkSpotifyBtn
             profileBtn.setVisibility(View.INVISIBLE);
+            linkSpotifyBtn.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -117,7 +143,6 @@ public class MainActivity extends AppCompatActivity {
      */
     public void getUserProfile() {
 
-        getToken(this);
         getCode(MainActivity.this);
 
         if (mAccessToken == null) {
@@ -174,18 +199,12 @@ public class MainActivity extends AppCompatActivity {
 
                     db.collection("users").document(userID)
                             .update(user)
-                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    Log.d(TAG, "DocumentSnapshot added with ID: " + userID);
-                                }
+                            .addOnSuccessListener(aVoid -> {
+                                Log.d(TAG, "DocumentSnapshot added with ID: " + userID);
+                                // Fill RecyclerView with data
+                                fillRecyclerView(parsedData);
                             })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.w(TAG, "Error updating document", e);
-                                }
-                            });
+                            .addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
 
                 } catch (JSONException e) {
                     Log.d("JSON", "Failed to parse data: " + e);
@@ -197,14 +216,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Creates a UI thread to update a TextView in the background
-     * Reduces UI latency and makes the system perform more consistently
-     *
-     * @param text the text to set
-     * @param textView TextView object to update
+     * Fill RecyclerView with data
+     * @param artistData List of top 10 artists
      */
-    private void setTextAsync(final String text, TextView textView) {
-        runOnUiThread(() -> textView.setText(text));
+    private void fillRecyclerView(List<top10Artists> artistData) {
+        // Clear existing data
+        artistList.clear();
+        // Add new data
+        artistList.addAll(artistData);
+        // Notify adapter about data change
+        artistAdapter.notifyDataSetChanged();
     }
     public void settings_btn_click(View view) {
         startActivity(new Intent(this, SettingsPage.class));

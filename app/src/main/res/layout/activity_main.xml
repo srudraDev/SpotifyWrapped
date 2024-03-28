@@ -21,13 +21,23 @@
         android:id="@+id/recycler_view_top_artists"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="64dp"
-        />
+        android:layout_marginTop="64dp" />
+
+    <Button
+        android:id="@+id/link_spotify_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginBottom="360dp"
+        android:text="Link Spotify"
+        app:layout_constraintBottom_toBottomOf="@+id/recycler_view_top_artists"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/recycler_view_top_artists" />
 
     <Button
         android:id="@+id/profile_btn"
         android:layout_width="wrap_content"
-        android:layout_height="40dp"
+        android:layout_height="50dp"
         android:layout_gravity="center_vertical"
         android:layout_marginBottom="360dp"
         android:text="Load Profile"

@@ -46,12 +46,8 @@ public class LoginActivity extends AppCompatActivity {
         firebaseAuth.signInWithEmailAndPassword(username, password).addOnCompleteListener(this, task -> {
             if (task.isSuccessful()) {
                 Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show();
+                Log.d("Login Successful", "Logged into Firebase");
                 Intent intent = new Intent(this, MainActivity.class);
-                try {
-                    pullSpotifyDataToDatabase.getToken(this); //gets spotify code
-                } catch (Exception e) {
-                    Log.d("GetTokenError", "getToken did not work");
-                }
                 startActivity(intent);
                 finish();
             } else {

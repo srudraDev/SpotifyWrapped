@@ -12,9 +12,9 @@ import java.util.List;
 
 public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistViewHolder> {
 
-    private List<Artist> artistList;
+    private List<top10Artists> artistList;
 
-    public ArtistAdapter(List<Artist> artistList) {
+    public ArtistAdapter(List<top10Artists> artistList) {
         this.artistList = artistList;
     }
 
