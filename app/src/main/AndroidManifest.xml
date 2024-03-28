@@ -42,9 +42,6 @@
         <activity android:name=".SettingsPage"
             android:exported="true"
             />
-        <activity android:name=".EditAccountInformation"
-            android:exported="true"
-            />
     </application>
 
 </manifest>

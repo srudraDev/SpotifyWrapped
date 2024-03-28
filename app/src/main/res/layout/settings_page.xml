@@ -20,14 +20,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:id="@+id/colorMode"
-        android:text="Change Color Mode"
-        android:onClick="change_color_mode" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:id="@+id/edit_btn"
         android:text="Edit Account Information"
         android:onClick="edit_account_button"/>
