@@ -16,7 +16,6 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -167,7 +166,10 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("Looper", "Looper already prepared: " + e);
                 }
                 try {
-                    final JSONObject jsonObject = new JSONObject(response.body().string());
+                    String responseBody = response.body().string();
+                    //Log.d("ResponseBodyUser", responseBody);
+
+                    final JSONObject jsonObject = new JSONObject(responseBody);
                     String displayName = jsonObject.getString("display_name");
                     String spotifyUserId = jsonObject.getString("id");
                     String userProfileImageURL;
@@ -178,7 +180,6 @@ public class MainActivity extends AppCompatActivity {
                         userProfileImageURL = "@drawable/ic_default_profile_image"; //a default user profile image
                         Log.d("ProfileImageError", "No Profile Image Found");
                     }
-
 
                     List<top10Artists> parsedData = fetchTop10Artist(mAccessToken,mOkHttpClient);
                     Map<String, Object> user = new HashMap<>();
