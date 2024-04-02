@@ -10,12 +10,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
-import android.graphics.Color;
 import android.content.Intent;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,8 +49,8 @@ public class MainActivity extends AppCompatActivity {
     private ArtistAdapter artistAdapter;
     private List<top10Artists> artistList;
     private boolean isProfileBtnClicked = false;
-    private Button profileBtn;
     private Button linkSpotifyBtn;
+    private TextView mainPageName;
 
 
     @Override
@@ -58,44 +58,29 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        profileBtn = (Button) findViewById(R.id.profile_btn);
-        linkSpotifyBtn = (Button) findViewById(R.id.link_spotify_btn);
-
+        linkSpotifyBtn = findViewById(R.id.link_spotify_btn);
+        mainPageName = findViewById(R.id.mainPageName);
         // Initialize FireStore
         db = FirebaseFirestore.getInstance();
 
         // RecyclerView
-        artistList = new ArrayList<top10Artists>();
+        artistList = new ArrayList<>();
         artistAdapter = new ArtistAdapter(artistList);
         initiateRecyclerView(recyclerView);
 
 
         // Set the click listeners for the buttons
-        hide(profileBtn);
 
         linkSpotifyBtn.setOnClickListener(v -> {
             // Call getToken() to link Spotify
             Log.d("Token", "Getting token");
             getToken(MainActivity.this);
             Log.d("Token Done", "Got Token");
-            // enable Load Profile button
-            profileBtn.setEnabled(true);
-            // Reveal the Load Profile button
-            profileBtn.setVisibility(View.VISIBLE);
-            profileBtn.setClickable(true);
-            profileBtn.setFocusable(true);
             // Disable linkSpotifyButton
-            linkSpotifyBtn.setBackgroundColor(Color.TRANSPARENT);
             hide(linkSpotifyBtn);
-            Log.d("Link Spotify Successful", "Linked to Spotify Account Successfully");
-        });
-
-        profileBtn.setOnClickListener(v -> {
-            Log.d("Profile", "Profile button has been clicked");
-            profileBtn.setBackgroundColor(Color.TRANSPARENT);
+            mainPageName.setVisibility(View.VISIBLE);
             isProfileBtnClicked = true;
-            getUserProfile();
-            profileBtn.setEnabled(false);
+            Log.d("Link Spotify Successful", "Linked to Spotify Account Successfully");
         });
     }
     @Override
@@ -104,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
         // Check if profileBtn is clicked
         if (isProfileBtnClicked) {
             // Hide profileBtn and linkSpotifyBtn
-            profileBtn.setVisibility(View.INVISIBLE);
             linkSpotifyBtn.setVisibility(View.INVISIBLE);
         }
     }
@@ -122,9 +106,7 @@ public class MainActivity extends AppCompatActivity {
         if (response != null) {
             if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
                 mAccessToken = response.getAccessToken();
-
-            } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
-                mAccessCode = response.getCode();
+                getUserProfile();
             }
         }
     }
@@ -134,8 +116,6 @@ public class MainActivity extends AppCompatActivity {
      * This method will get the user profile using the token
      */
     public void getUserProfile() {
-
-        getCode(MainActivity.this);
 
         if (mAccessToken == null) {
             Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();

@@ -35,7 +35,7 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistView
         Glide.with(holder.artistImageView.getContext())
                 .load(artistList.get(position).getSecondImageUrl())
                 .into(holder.artistImageView);
-        holder.bind(artistName, artistGenres);
+        holder.bind(artistName, artistGenres, position + 1);
     }
 
     @Override
@@ -47,17 +47,20 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistView
         private final TextView artistNameTextView;
         private final TextView artistGenresTextView;
         private final ImageView artistImageView;
+        private final TextView artist_rank_textview;
 
         public ArtistViewHolder(@NonNull View itemView) {
             super(itemView);
             artistNameTextView = itemView.findViewById(R.id.artist_name_text_view);
             artistGenresTextView = itemView.findViewById(R.id.artist_genres_text_view);
             artistImageView = itemView.findViewById(R.id.artist_image_view);
+            artist_rank_textview = itemView.findViewById(R.id.artist_rank_textview);
         }
 
-        public void bind(String artistName, String artistGenres) {
+        public void bind(String artistName, String artistGenres, int rank) {
             artistNameTextView.setText(artistName);
             artistGenresTextView.setText(artistGenres);
+            artist_rank_textview.setText(String.valueOf(rank));
         }
     }
 }
