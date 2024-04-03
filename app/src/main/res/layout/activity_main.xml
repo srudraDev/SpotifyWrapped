@@ -12,6 +12,7 @@
         android:id="@+id/settings_btn"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
+        android:layout_marginEnd="4dp"
         android:onClick="settings_btn_click"
         android:text="Settings"
         app:layout_constraintEnd_toEndOf="parent"
@@ -28,24 +29,26 @@
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:layout_gravity="center_vertical"
-        android:layout_marginBottom="360dp"
+        android:layout_marginBottom="680dp"
         android:text="Link Spotify"
-        app:layout_constraintBottom_toBottomOf="@+id/recycler_view_top_artists"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.055"
         app:layout_constraintStart_toStartOf="@+id/recycler_view_top_artists" />
 
-    <Button
-        android:id="@+id/profile_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:layout_gravity="center_vertical"
-        android:layout_marginBottom="360dp"
-        android:text="Load Profile"
-        app:layout_constraintBottom_toBottomOf="@+id/recycler_view_top_artists"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/recycler_view_top_artists" />
-
-
+    <TextView
+        android:id="@+id/mainPageName"
+        android:layout_width="181dp"
+        android:layout_height="25dp"
+        android:text="Current Top 10 Artists"
+        android:visibility="gone"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/recycler_view_top_artists"
+        app:layout_constraintEnd_toStartOf="@+id/settings_btn"
+        app:layout_constraintHorizontal_bias="0.19"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.432" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
