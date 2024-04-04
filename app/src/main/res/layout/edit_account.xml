@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:background="#D6D6D6"
+    tools:context=".SettingsPage">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_margin="0dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/popup_edit_account"
+        android:orientation="vertical"
+        >
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_gravity="right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/lightGray"
+            android:src="@mipmap/cancelbutton_foreground"
+            android:onClick="cancel_edit_account"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Current Account Information"
+            android:textSize="25dp" />
+
+        <TextView
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Account Email:"/>
+
+        <EditText
+            android:id="@+id/edit_account_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Account Password:"/>
+        <EditText
+            android:id="@+id/edit_account_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Confirm Changes"
+            android:layout_gravity="center"
+            android:backgroundTint="@color/lightGray"
+            android:textColor="@color/black"
+            android:onClick="successful_account_edit"
+            />
+
+    </LinearLayout>
+
+
+</RelativeLayout>

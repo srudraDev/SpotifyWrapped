@@ -3,7 +3,6 @@ package com.example.spotifywrapped;
 import static android.content.ContentValues.TAG;
 
 import static com.example.spotifywrapped.pullSpotifyDataToDatabase.*;
-import static com.example.spotifywrapped.top10Artists.fetchTop10Artist;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,7 +14,10 @@ import android.content.Intent;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -41,16 +43,19 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
-    public static String mAccessToken, mAccessCode;
+    public static String mAccessToken;
     public static final OkHttpClient mOkHttpClient = new OkHttpClient();
     private FirebaseAuth firebaseAuth;
     private FirebaseFirestore db;
     private RecyclerView recyclerView;
     private ArtistAdapter artistAdapter;
+    private TrackAdapter trackAdapter;
     private List<top10Artists> artistList;
+    private List<top10Tracks> trackList;
     private boolean isProfileBtnClicked = false;
-    private Button profileBtn;
+    private static boolean isAccountDeleted = false;
     private Button linkSpotifyBtn;
+    private Spinner mainPageName;
 
 
     @Override
@@ -58,54 +63,69 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        profileBtn = (Button) findViewById(R.id.profile_btn);
-        linkSpotifyBtn = (Button) findViewById(R.id.link_spotify_btn);
-
+        linkSpotifyBtn = findViewById(R.id.link_spotify_btn);
+        mainPageName = findViewById(R.id.typeOfWrapped);
         // Initialize FireStore
         db = FirebaseFirestore.getInstance();
 
         // RecyclerView
-        artistList = new ArrayList<top10Artists>();
+        artistList = new ArrayList<>();
+        trackList = new ArrayList<>();
         artistAdapter = new ArtistAdapter(artistList);
         initiateRecyclerView(recyclerView);
 
 
         // Set the click listeners for the buttons
-        hide(profileBtn);
 
         linkSpotifyBtn.setOnClickListener(v -> {
             // Call getToken() to link Spotify
             Log.d("Token", "Getting token");
             getToken(MainActivity.this);
             Log.d("Token Done", "Got Token");
-            // enable Load Profile button
-            profileBtn.setEnabled(true);
-            // Reveal the Load Profile button
-            profileBtn.setVisibility(View.VISIBLE);
-            profileBtn.setClickable(true);
-            profileBtn.setFocusable(true);
             // Disable linkSpotifyButton
-            linkSpotifyBtn.setBackgroundColor(Color.TRANSPARENT);
-            hide(linkSpotifyBtn);
+            isProfileBtnClicked = true;
             Log.d("Link Spotify Successful", "Linked to Spotify Account Successfully");
         });
-
-        profileBtn.setOnClickListener(v -> {
-            Log.d("Profile", "Profile button has been clicked");
-            profileBtn.setBackgroundColor(Color.TRANSPARENT);
-            isProfileBtnClicked = true;
-            getUserProfile();
-            profileBtn.setEnabled(false);
+        mainPageName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // Handle item selection
+                switch (position) {
+                    case 0:
+                        // Load data for top 10 artists
+                        recyclerView.setAdapter(artistAdapter);
+                        break;
+                    case 1:
+                        // Load data for top 10 tracks
+                        trackAdapter = new TrackAdapter(trackList);
+                        recyclerView.setAdapter(trackAdapter);
+                        break;
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                // Do nothing
+            }
         });
     }
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d("MYLOGGG", "within the resume");
+        //check if user has been deleted
+        if (isAccountDeleted) {
+            Log.d("MYLOGGG", "successfully hit true if statement");
+
+            isAccountDeleted = false;
+            finish();
+
+        }
+
         // Check if profileBtn is clicked
         if (isProfileBtnClicked) {
             // Hide profileBtn and linkSpotifyBtn
-            profileBtn.setVisibility(View.INVISIBLE);
             linkSpotifyBtn.setVisibility(View.INVISIBLE);
+            mainPageName.setVisibility(View.VISIBLE);
         }
     }
 
@@ -122,9 +142,7 @@ public class MainActivity extends AppCompatActivity {
         if (response != null) {
             if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
                 mAccessToken = response.getAccessToken();
-
-            } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
-                mAccessCode = response.getCode();
+                getUserProfile();
             }
         }
     }
@@ -134,8 +152,6 @@ public class MainActivity extends AppCompatActivity {
      * This method will get the user profile using the token
      */
     public void getUserProfile() {
-
-        getCode(MainActivity.this);
 
         if (mAccessToken == null) {
             Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
@@ -180,12 +196,15 @@ public class MainActivity extends AppCompatActivity {
                         userProfileImageURL = "@drawable/ic_default_profile_image"; //a default user profile image
                         Log.d("ProfileImageError", "No Profile Image Found");
                     }
-
-                    List<top10Artists> parsedData = fetchTop10Artist(mAccessToken,mOkHttpClient);
+                    top10Artists.ArtistFetcher artistFetcher = new top10Artists.ArtistFetcher();
+                    List<top10Artists> parsedData = artistFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
+                    top10Tracks.TrackFetcher trackFetcher = new top10Tracks.TrackFetcher();
+                    List<top10Tracks> parsedTracksData = trackFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
                     Map<String, Object> user = new HashMap<>();
                     user.put("displayName", displayName);
                     user.put("spotifyId", spotifyUserId);
                     user.put("Artists10", parsedData);
+                    user.put("Tracks10", parsedTracksData);
                     user.put("profilePic", userProfileImageURL);
                     firebaseAuth = FirebaseAuth.getInstance();
                     FirebaseUser currentUser = firebaseAuth.getCurrentUser();
@@ -197,6 +216,7 @@ public class MainActivity extends AppCompatActivity {
                                 Log.d(TAG, "DocumentSnapshot added with ID: " + userID);
                                 // Fill RecyclerView with data
                                 fillRecyclerView(parsedData);
+                                trackList = parsedTracksData;
                             })
                             .addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
 
@@ -222,12 +242,6 @@ public class MainActivity extends AppCompatActivity {
         artistAdapter.notifyDataSetChanged();
     }
 
-    public void hide(Button button) {
-        button.setEnabled(false);
-        button.setVisibility(View.INVISIBLE);
-        button.setClickable(false);
-        button.setFocusable(false);
-    }
     public void initiateRecyclerView(RecyclerView rv) {
         recyclerView = findViewById(R.id.recycler_view_top_artists);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -236,11 +250,16 @@ public class MainActivity extends AppCompatActivity {
 
     public void settings_btn_click(View view) {
         startActivity(new Intent(this, SettingsPage.class));
-        finish();
+
+        //finish();
     }
     @Override
     protected void onDestroy() {
         cancelCall();
         super.onDestroy();
+    }
+
+    public static void setAccountDeleted(boolean input) {
+        isAccountDeleted = input;
     }
 }
