@@ -35,11 +35,11 @@
         app:layout_constraintHorizontal_bias="0.055"
         app:layout_constraintStart_toStartOf="@+id/recycler_view_top_artists" />
 
-    <TextView
-        android:id="@+id/mainPageName"
-        android:layout_width="181dp"
+    <Spinner
+        android:id="@+id/typeOfWrapped"
+        android:layout_width="225dp"
         android:layout_height="25dp"
-        android:text="Current Top 10 Artists"
+        android:background="@android:color/transparent"
         android:visibility="gone"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -48,7 +48,8 @@
         app:layout_constraintHorizontal_bias="0.19"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.432" />
+        app:layout_constraintVertical_bias="0.432"
+        android:entries="@array/typeOfWrapped" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

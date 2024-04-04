@@ -3,7 +3,6 @@ package com.example.spotifywrapped;
 import static android.content.ContentValues.TAG;
 
 import static com.example.spotifywrapped.pullSpotifyDataToDatabase.*;
-import static com.example.spotifywrapped.top10Artists.fetchTop10Artist;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,7 +13,9 @@ import android.content.Intent;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,16 +42,18 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
-    public static String mAccessToken, mAccessCode;
+    public static String mAccessToken;
     public static final OkHttpClient mOkHttpClient = new OkHttpClient();
     private FirebaseAuth firebaseAuth;
     private FirebaseFirestore db;
     private RecyclerView recyclerView;
     private ArtistAdapter artistAdapter;
+    private TrackAdapter trackAdapter;
     private List<top10Artists> artistList;
+    private List<top10Tracks> trackList;
     private boolean isProfileBtnClicked = false;
     private Button linkSpotifyBtn;
-    private TextView mainPageName;
+    private Spinner mainPageName;
 
 
     @Override
@@ -59,12 +62,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         linkSpotifyBtn = findViewById(R.id.link_spotify_btn);
-        mainPageName = findViewById(R.id.mainPageName);
+        mainPageName = findViewById(R.id.typeOfWrapped);
         // Initialize FireStore
         db = FirebaseFirestore.getInstance();
 
         // RecyclerView
         artistList = new ArrayList<>();
+        trackList = new ArrayList<>();
         artistAdapter = new ArtistAdapter(artistList);
         initiateRecyclerView(recyclerView);
 
@@ -77,10 +81,29 @@ public class MainActivity extends AppCompatActivity {
             getToken(MainActivity.this);
             Log.d("Token Done", "Got Token");
             // Disable linkSpotifyButton
-            hide(linkSpotifyBtn);
-            mainPageName.setVisibility(View.VISIBLE);
             isProfileBtnClicked = true;
             Log.d("Link Spotify Successful", "Linked to Spotify Account Successfully");
+        });
+        mainPageName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // Handle item selection
+                switch (position) {
+                    case 0:
+                        // Load data for top 10 artists
+                        recyclerView.setAdapter(artistAdapter);
+                        break;
+                    case 1:
+                        // Load data for top 10 tracks
+                        trackAdapter = new TrackAdapter(trackList);
+                        recyclerView.setAdapter(trackAdapter);
+                        break;
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                // Do nothing
+            }
         });
     }
     @Override
@@ -90,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         if (isProfileBtnClicked) {
             // Hide profileBtn and linkSpotifyBtn
             linkSpotifyBtn.setVisibility(View.INVISIBLE);
+            mainPageName.setVisibility(View.VISIBLE);
         }
     }
 
@@ -160,12 +184,15 @@ public class MainActivity extends AppCompatActivity {
                         userProfileImageURL = "@drawable/ic_default_profile_image"; //a default user profile image
                         Log.d("ProfileImageError", "No Profile Image Found");
                     }
-
-                    List<top10Artists> parsedData = fetchTop10Artist(mAccessToken,mOkHttpClient);
+                    top10Artists.ArtistFetcher artistFetcher = new top10Artists.ArtistFetcher();
+                    List<top10Artists> parsedData = artistFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
+                    top10Tracks.TrackFetcher trackFetcher = new top10Tracks.TrackFetcher();
+                    List<top10Tracks> parsedTracksData = trackFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
                     Map<String, Object> user = new HashMap<>();
                     user.put("displayName", displayName);
                     user.put("spotifyId", spotifyUserId);
                     user.put("Artists10", parsedData);
+                    user.put("Tracks10", parsedTracksData);
                     user.put("profilePic", userProfileImageURL);
                     firebaseAuth = FirebaseAuth.getInstance();
                     FirebaseUser currentUser = firebaseAuth.getCurrentUser();
@@ -177,6 +204,7 @@ public class MainActivity extends AppCompatActivity {
                                 Log.d(TAG, "DocumentSnapshot added with ID: " + userID);
                                 // Fill RecyclerView with data
                                 fillRecyclerView(parsedData);
+                                trackList = parsedTracksData;
                             })
                             .addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
 
@@ -202,12 +230,6 @@ public class MainActivity extends AppCompatActivity {
         artistAdapter.notifyDataSetChanged();
     }
 
-    public void hide(Button button) {
-        button.setEnabled(false);
-        button.setVisibility(View.INVISIBLE);
-        button.setClickable(false);
-        button.setFocusable(false);
-    }
     public void initiateRecyclerView(RecyclerView rv) {
         recyclerView = findViewById(R.id.recycler_view_top_artists);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
