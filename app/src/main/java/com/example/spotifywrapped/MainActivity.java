@@ -51,8 +51,8 @@ public class MainActivity extends AppCompatActivity {
     private List<top10Artists> artistList;
     private boolean isProfileBtnClicked = false;
     private static boolean isAccountDeleted = false;
-    private Button profileBtn;
     private Button linkSpotifyBtn;
+    private TextView mainPageName;
 
 
     @Override
@@ -60,14 +60,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        profileBtn = (Button) findViewById(R.id.profile_btn);
-        linkSpotifyBtn = (Button) findViewById(R.id.link_spotify_btn);
-
+        linkSpotifyBtn = findViewById(R.id.link_spotify_btn);
+        mainPageName = findViewById(R.id.mainPageName);
         // Initialize FireStore
         db = FirebaseFirestore.getInstance();
 
         // RecyclerView
-        artistList = new ArrayList<top10Artists>();
+        artistList = new ArrayList<>();
         artistAdapter = new ArtistAdapter(artistList);
         initiateRecyclerView(recyclerView);
 
@@ -80,24 +79,11 @@ public class MainActivity extends AppCompatActivity {
             Log.d("Token", "Getting token");
             getToken(MainActivity.this);
             Log.d("Token Done", "Got Token");
-            // enable Load Profile button
-            profileBtn.setEnabled(true);
-            // Reveal the Load Profile button
-            profileBtn.setVisibility(View.VISIBLE);
-            profileBtn.setClickable(true);
-            profileBtn.setFocusable(true);
             // Disable linkSpotifyButton
-            linkSpotifyBtn.setBackgroundColor(Color.TRANSPARENT);
             hide(linkSpotifyBtn);
-            Log.d("Link Spotify Successful", "Linked to Spotify Account Successfully");
-        });
-
-        profileBtn.setOnClickListener(v -> {
-            Log.d("Profile", "Profile button has been clicked");
-            profileBtn.setBackgroundColor(Color.TRANSPARENT);
+            mainPageName.setVisibility(View.VISIBLE);
             isProfileBtnClicked = true;
-            getUserProfile();
-            profileBtn.setEnabled(false);
+            Log.d("Link Spotify Successful", "Linked to Spotify Account Successfully");
         });
     }
     @Override
@@ -116,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
         // Check if profileBtn is clicked
         if (isProfileBtnClicked) {
             // Hide profileBtn and linkSpotifyBtn
-            profileBtn.setVisibility(View.INVISIBLE);
             linkSpotifyBtn.setVisibility(View.INVISIBLE);
         }
     }
@@ -134,9 +119,7 @@ public class MainActivity extends AppCompatActivity {
         if (response != null) {
             if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
                 mAccessToken = response.getAccessToken();
-
-            } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
-                mAccessCode = response.getCode();
+                getUserProfile();
             }
         }
     }
@@ -146,8 +129,6 @@ public class MainActivity extends AppCompatActivity {
      * This method will get the user profile using the token
      */
     public void getUserProfile() {
-
-        getCode(MainActivity.this);
 
         if (mAccessToken == null) {
             Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
@@ -178,7 +159,10 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("Looper", "Looper already prepared: " + e);
                 }
                 try {
-                    final JSONObject jsonObject = new JSONObject(response.body().string());
+                    String responseBody = response.body().string();
+                    //Log.d("ResponseBodyUser", responseBody);
+
+                    final JSONObject jsonObject = new JSONObject(responseBody);
                     String displayName = jsonObject.getString("display_name");
                     String spotifyUserId = jsonObject.getString("id");
                     String userProfileImageURL;
@@ -189,7 +173,6 @@ public class MainActivity extends AppCompatActivity {
                         userProfileImageURL = "@drawable/ic_default_profile_image"; //a default user profile image
                         Log.d("ProfileImageError", "No Profile Image Found");
                     }
-
 
                     List<top10Artists> parsedData = fetchTop10Artist(mAccessToken,mOkHttpClient);
                     Map<String, Object> user = new HashMap<>();
@@ -238,6 +221,7 @@ public class MainActivity extends AppCompatActivity {
         button.setClickable(false);
         button.setFocusable(false);
     }
+
     public void initiateRecyclerView(RecyclerView rv) {
         recyclerView = findViewById(R.id.recycler_view_top_artists);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

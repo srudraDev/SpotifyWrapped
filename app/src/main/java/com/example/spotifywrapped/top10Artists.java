@@ -15,9 +15,9 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class top10Artists {
-    private String name;
-    private List<String> genres;
-    private String secondImageUrl;
+    private final String name;
+    private final List<String> genres;
+    private final String secondImageUrl;
 
     public top10Artists(String name, List<String> genres, String secondImageUrl) {
         this.name = name;
@@ -43,7 +43,10 @@ public class top10Artists {
                 .addHeader("Authorization", "Bearer " + mAccessToken)
                 .build();
         try (Response response = mOkHttpClient.newCall(top10Artists).execute()) {
-           final JSONObject top10ArtistsJSON = new JSONObject(response.body().string());
+            assert response.body() != null;
+            String responseBody = response.body().string();
+            //Log.d("ResponseBodyArtists", responseBody);
+            final JSONObject top10ArtistsJSON = new JSONObject(responseBody);
             parsedData = parseJson(top10ArtistsJSON);
         } catch (JSONException e) {
             Log.d("JSON", "Failed to parse data: " + e);
@@ -55,6 +58,11 @@ public class top10Artists {
     public static List<top10Artists> parseJson(JSONObject json) throws JSONException{
         List<top10Artists> wantedData = new ArrayList<>();
         JSONArray artists = json.getJSONArray("items");
+
+        if (artists.length() == 0) {
+            wantedData.add(new top10Artists("You have no artists! Listen to some and come back later", null, null));
+            return wantedData;
+        }
 
         for (int i = 0; i < artists.length(); i++) {
             JSONObject artist = artists.getJSONObject(i);
@@ -68,6 +76,7 @@ public class top10Artists {
             String secondImageUrl = artist.getJSONArray("images").getJSONObject(1).getString("url");
             wantedData.add(new top10Artists(name, genresList, secondImageUrl));
         }
+        Log.d("parseJSON",wantedData.get(0).name);
         return wantedData;
     }
 }

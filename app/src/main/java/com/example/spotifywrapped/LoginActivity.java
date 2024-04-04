@@ -49,7 +49,7 @@ public class LoginActivity extends AppCompatActivity {
                 Log.d("Login Successful", "Logged into Firebase");
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
-                //finish();
+                finish();
             } else {
                 Toast.makeText(this, "Login Failed.", Toast.LENGTH_SHORT).show();
             }
