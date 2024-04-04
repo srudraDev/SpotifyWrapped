@@ -29,17 +29,23 @@
         android:padding="8dp">
 
         <TextView
-            android:id="@+id/artist_name_text_view"
+            android:id="@+id/name_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="18sp"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/artist_genres_text_view"
+            android:id="@+id/additional_details_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/album_name_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp" />
 
     </LinearLayout>
 
