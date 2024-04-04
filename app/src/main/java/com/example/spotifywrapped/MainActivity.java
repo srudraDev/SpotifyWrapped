@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.graphics.Color;
 import android.content.Intent;
 import android.os.Looper;
 import android.util.Log;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private ArtistAdapter artistAdapter;
     private List<top10Artists> artistList;
     private boolean isProfileBtnClicked = false;
+    private static boolean isAccountDeleted = false;
     private Button linkSpotifyBtn;
     private TextView mainPageName;
 
@@ -70,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         // Set the click listeners for the buttons
+        hide(profileBtn);
 
         linkSpotifyBtn.setOnClickListener(v -> {
             // Call getToken() to link Spotify
@@ -86,6 +89,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d("MYLOGGG", "within the resume");
+        //check if user has been deleted
+        if (isAccountDeleted) {
+            Log.d("MYLOGGG", "successfully hit true if statement");
+
+            isAccountDeleted = false;
+            finish();
+
+        }
+
         // Check if profileBtn is clicked
         if (isProfileBtnClicked) {
             // Hide profileBtn and linkSpotifyBtn
@@ -208,6 +221,7 @@ public class MainActivity extends AppCompatActivity {
         button.setClickable(false);
         button.setFocusable(false);
     }
+
     public void initiateRecyclerView(RecyclerView rv) {
         recyclerView = findViewById(R.id.recycler_view_top_artists);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -216,11 +230,16 @@ public class MainActivity extends AppCompatActivity {
 
     public void settings_btn_click(View view) {
         startActivity(new Intent(this, SettingsPage.class));
-        finish();
+
+        //finish();
     }
     @Override
     protected void onDestroy() {
         cancelCall();
         super.onDestroy();
+    }
+
+    public static void setAccountDeleted(boolean input) {
+        isAccountDeleted = input;
     }
 }
