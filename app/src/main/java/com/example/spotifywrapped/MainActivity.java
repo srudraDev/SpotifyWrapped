@@ -72,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         // Set the click listeners for the buttons
-        hide(profileBtn);
 
         linkSpotifyBtn.setOnClickListener(v -> {
             // Call getToken() to link Spotify
