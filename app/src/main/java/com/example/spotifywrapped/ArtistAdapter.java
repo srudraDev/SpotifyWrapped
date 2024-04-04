@@ -51,8 +51,8 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistView
 
         public ArtistViewHolder(@NonNull View itemView) {
             super(itemView);
-            artistNameTextView = itemView.findViewById(R.id.artist_name_text_view);
-            artistGenresTextView = itemView.findViewById(R.id.artist_genres_text_view);
+            artistNameTextView = itemView.findViewById(R.id.name_text_view);
+            artistGenresTextView = itemView.findViewById(R.id.additional_details_text_view);
             artistImageView = itemView.findViewById(R.id.artist_image_view);
             artist_rank_textview = itemView.findViewById(R.id.artist_rank_textview);
         }
