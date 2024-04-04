@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private ArtistAdapter artistAdapter;
     private List<top10Artists> artistList;
     private boolean isProfileBtnClicked = false;
+    private static boolean isAccountDeleted = false;
     private Button profileBtn;
     private Button linkSpotifyBtn;
 
@@ -102,6 +103,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d("MYLOGGG", "within the resume");
+        //check if user has been deleted
+        if (isAccountDeleted) {
+            Log.d("MYLOGGG", "successfully hit true if statement");
+
+            isAccountDeleted = false;
+            finish();
+
+        }
+
         // Check if profileBtn is clicked
         if (isProfileBtnClicked) {
             // Hide profileBtn and linkSpotifyBtn
@@ -235,11 +246,16 @@ public class MainActivity extends AppCompatActivity {
 
     public void settings_btn_click(View view) {
         startActivity(new Intent(this, SettingsPage.class));
-        finish();
+
+        //finish();
     }
     @Override
     protected void onDestroy() {
         cancelCall();
         super.onDestroy();
+    }
+
+    public static void setAccountDeleted(boolean input) {
+        isAccountDeleted = input;
     }
 }
