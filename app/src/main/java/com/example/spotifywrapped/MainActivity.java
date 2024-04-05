@@ -111,14 +111,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("MYLOGGG", "within the resume");
+        Log.d("MYLOG", "within the resume");
         //check if user has been deleted
         if (isAccountDeleted) {
-            Log.d("MYLOGGG", "successfully hit true if statement");
+            Log.d("MYLOG", "successfully hit true if statement");
 
             isAccountDeleted = false;
             finish();
-
         }
 
         // Check if profileBtn is clicked
