@@ -21,9 +21,16 @@ public class top10Artists extends top10Items{
         return genres;
     }
     public static class ArtistFetcher extends Fetcher<top10Artists> {
+        private String time;
+        public ArtistFetcher(String time) {
+            this.time = time;
+        }
+        public ArtistFetcher() {
+            this("medium_term");
+        }
         @Override
         protected String getEndpoint() {
-            return "https://api.spotify.com/v1/me/top/artists?limit=10";
+            return "https://api.spotify.com/v1/me/top/artists?time_range=" + this.time + "&limit=10";
         }
 
         @Override

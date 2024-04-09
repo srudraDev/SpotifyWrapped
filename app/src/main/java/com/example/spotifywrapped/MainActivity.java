@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isProfileBtnClicked = false;
     private static boolean isAccountDeleted = false;
     private Button linkSpotifyBtn;
+    private Button past_button;
     private Spinner mainPageName;
 
 
@@ -76,6 +77,12 @@ public class MainActivity extends AppCompatActivity {
 
 
         // Set the click listeners for the buttons
+
+        past_button = findViewById(R.id.past_button);
+        past_button.setOnClickListener(view -> {
+            Intent intent = new Intent(this, PastWrappedActivity.class);
+            startActivity(intent);
+        });
 
         linkSpotifyBtn.setOnClickListener(v -> {
             // Call getToken() to link Spotify
@@ -195,14 +202,22 @@ public class MainActivity extends AppCompatActivity {
                         userProfileImageURL = "@drawable/ic_default_profile_image"; //a default user profile image
                         Log.d("ProfileImageError", "No Profile Image Found");
                     }
-                    top10Artists.ArtistFetcher artistFetcher = new top10Artists.ArtistFetcher();
+                    top10Artists.ArtistFetcher artistFetcher = new top10Artists.ArtistFetcher("long_term");
                     List<top10Artists> parsedData = artistFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
+                    // Medium and Long term data
+                    top10Artists.ArtistFetcher artistFetcherMedium = new top10Artists.ArtistFetcher("medium_term");
+                    List<top10Artists> parsedDataMedium = artistFetcherMedium.fetchTop10Items(mAccessToken, mOkHttpClient);
+                    top10Artists.ArtistFetcher artistFetcherLong = new top10Artists.ArtistFetcher("long_term");
+                    List<top10Artists> parsedDataLong = artistFetcherLong.fetchTop10Items(mAccessToken, mOkHttpClient);
+                    //
                     top10Tracks.TrackFetcher trackFetcher = new top10Tracks.TrackFetcher();
                     List<top10Tracks> parsedTracksData = trackFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
                     Map<String, Object> user = new HashMap<>();
                     user.put("displayName", displayName);
                     user.put("spotifyId", spotifyUserId);
                     user.put("Artists10", parsedData);
+                    user.put("ArtistsMedium10", parsedDataMedium);
+                    user.put("ArtistsLong10", parsedDataLong);
                     user.put("Tracks10", parsedTracksData);
                     user.put("profilePic", userProfileImageURL);
                     firebaseAuth = FirebaseAuth.getInstance();
