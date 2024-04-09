@@ -60,14 +60,14 @@
         android:layout_gravity="center"
         android:backgroundTint="@color/lightGray"
         android:onClick="delete_account_button"
-        android:text="Delete it."
+        android:text="Yes, delete it."
         android:textColor="@color/black"
         android:textSize="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/button_no"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView"
-        app:layout_constraintVertical_bias="0.304" />
+        app:layout_constraintVertical_bias="0.307" />
 
     <Button
         android:id="@+id/button_no"
