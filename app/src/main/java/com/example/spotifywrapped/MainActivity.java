@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity
 
         bottomNavigationView
                 = findViewById(R.id.bottomNavigationView);
-
+                
         bottomNavigationView
                 .setOnNavigationItemSelectedListener(this);
         bottomNavigationView.setSelectedItemId(R.id.wrapped);

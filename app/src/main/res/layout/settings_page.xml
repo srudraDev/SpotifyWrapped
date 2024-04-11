@@ -14,7 +14,7 @@
         android:layout_gravity="center"
         android:id="@+id/delete_btn"
         android:text="Delete Your Account"
-        android:onClick="delete_account_button"
+        android:onClick="before_confirm_delete"
         />
 
     <Button

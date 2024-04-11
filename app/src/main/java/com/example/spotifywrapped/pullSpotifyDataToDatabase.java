@@ -35,17 +35,6 @@ public class pullSpotifyDataToDatabase {
     }
 
     /**
-     * Get code from Spotify
-     * This method will open the Spotify login activity and get the code
-     * What is code?
-     * https://developer.spotify.com/documentation/general/guides/authorization-guide/
-     */
-    public static void getCode(Activity activity) {
-        final AuthorizationRequest request = getAuthenticationRequest(AuthorizationResponse.Type.CODE);
-        AuthorizationClient.openLoginActivity(activity, AUTH_CODE_REQUEST_CODE, request);
-    }
-
-    /**
      * Get authentication request
      *
      * @param type the type of the request
