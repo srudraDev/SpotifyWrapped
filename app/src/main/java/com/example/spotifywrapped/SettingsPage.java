@@ -56,7 +56,7 @@ public class SettingsPage extends AppCompatActivity {
         currentUser.delete();
 
         Log.d("MYLOGGG", "successfully deleted user");
-        MainActivity.setAccountDeleted(true);
+        WrappedFragment.setAccountDeleted(true);
 
         Log.d("MYLOGGG", "successfully set deleted true");
         finish();
@@ -95,7 +95,7 @@ public class SettingsPage extends AppCompatActivity {
     //
     public void successful_account_edit(View view) {
         FirebaseAuth auth = FirebaseAuth.getInstance();
-        Log.d("MYLOG", "Auth has been done");
+        Log.d("MYLOG", "Auth has been done!");
 
         FirebaseUser currentUser = auth.getCurrentUser();
 
@@ -105,5 +105,6 @@ public class SettingsPage extends AppCompatActivity {
         if (!editPasswordText.getText().toString().equals("***")) {
             currentUser.updatePassword(editPasswordText.getText().toString());
         }
+        myDialog.hide();
     }
 }

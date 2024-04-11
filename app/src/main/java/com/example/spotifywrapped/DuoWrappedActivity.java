@@ -3,28 +3,19 @@ package com.example.spotifywrapped;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.List;
-
-public class PastWrappedActivity extends AppCompatActivity {
+public class DuoWrappedActivity extends AppCompatActivity {
     private Button present_button;
     private Button duo_button;
     private Button past_button;
     private Button public_button;
     private Button settings_button;
-    private RecyclerView recyclerView;
-    private ArtistAdapter artistAdapter;
-    private List<top10Artists> artistList;
-    private List<top10Artists> artistList2;
-    private Spinner time_frame_spinner;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.past_wrapped);
+        setContentView(R.layout.duo_wrapped);
 
         present_button = findViewById(R.id.present_button);
         duo_button = findViewById(R.id.duo_button);
@@ -33,7 +24,7 @@ public class PastWrappedActivity extends AppCompatActivity {
         settings_button = findViewById(R.id.settings_button);
 
         present_button.setOnClickListener(v -> {
-            Intent intent = new Intent(this, WrappedFragment.class);
+            Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         });
         duo_button.setOnClickListener(v -> {
@@ -44,10 +35,12 @@ public class PastWrappedActivity extends AppCompatActivity {
             Intent intent = new Intent(this, PastWrappedActivity.class);
             startActivity(intent);
         });
+
         public_button.setOnClickListener(v -> {
             Intent intent = new Intent(this, PublicWrappedActivity.class);
             startActivity(intent);
         });
+
         settings_button.setOnClickListener(v -> {
             Intent intent = new Intent(this, SettingsPage.class);
             startActivity(intent);

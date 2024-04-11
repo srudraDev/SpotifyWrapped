@@ -23,9 +23,13 @@ public class top10Tracks extends top10Items{
         return albumName;
     }
     public static class TrackFetcher extends Fetcher<top10Tracks> {
+        private final String timeRange;
+        public TrackFetcher (String timeRange) {
+            this.timeRange = timeRange;
+        }
         @Override
         protected String getEndpoint() {
-            return "https://api.spotify.com/v1/me/top/tracks?limit=10";
+            return "https://api.spotify.com/v1/me/top/tracks?limit=10&time_range=" + timeRange;
         }
         protected List<top10Tracks> parseJson(JSONObject json) throws JSONException {
             List<top10Tracks> wantedData = new ArrayList<>();

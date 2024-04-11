@@ -1,6 +1,7 @@
 package com.example.spotifywrapped;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
@@ -25,9 +26,12 @@ public class pullSpotifyDataToDatabase {
      * What is token?
      * https://developer.spotify.com/documentation/general/guides/authorization-guide/
      */
-    public static void getToken(Activity activity) {
-        final AuthorizationRequest request = getAuthenticationRequest(AuthorizationResponse.Type.TOKEN);
-        AuthorizationClient.openLoginActivity(activity, AUTH_TOKEN_REQUEST_CODE, request);
+    public static Intent getToken(Activity activity) {
+        AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI);
+        builder.setScopes(new String[]{"user-read-private", "user-read-email", "user-top-read"});
+        AuthorizationRequest request = builder.build();
+
+        return AuthorizationClient.createLoginActivityIntent(activity, request);
     }
 
     /**
