@@ -182,6 +182,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (mAccessToken == null) {
             Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
+            linkSpotifyBtn.setVisibility(View.VISIBLE);
+            mainPageName.setVisibility(View.INVISIBLE);
             return;
         }
 
@@ -350,28 +352,32 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("TEST", "DOCREF SUCCESSFUL");
                 // Document exists, extract the data
                 // Assuming the structure of your document is similar to how you parsed the Spotify API response
-                fireModel.setUserName(documentSnapshot.getString("userName"));
-                fireModel.setUserId(documentSnapshot.getString("userId"));
-                fireModel.setUserImage(documentSnapshot.getString("userImage"));
+                try {
+                    //fireModel.setUserName(documentSnapshot.getString("userName"));
+                    //fireModel.setUserId(documentSnapshot.getString("userId"));
+                    //fireModel.setUserImage(documentSnapshot.getString("userImage"));
 
-                // Assuming you have stored the parsed artist data as an array in Firestore
-                List<Map<String, Object>> Artists10 = (List<Map<String, Object>>) documentSnapshot.get("Artists10");
-                List<Map<String, Object>> ArtistsLong10 = (List<Map<String, Object>>) documentSnapshot.get("ArtistsLong10");
-                List<Map<String, Object>> ArtistsMedium10 = (List<Map<String, Object>>) documentSnapshot.get("ArtistsMedium10");
-                List<Map<String, Object>> Tracks10 = (List<Map<String, Object>>) documentSnapshot.get("Tracks10");
-                List<Map<String, Object>> TracksLong10 = (List<Map<String, Object>>) documentSnapshot.get("TracksLong10");
-                List<Map<String, Object>> TracksMedium10 = (List<Map<String, Object>>) documentSnapshot.get("TracksMedium10");
+                    // Assuming you have stored the parsed artist data as an array in Firestore
+                    List<Map<String, Object>> Artists10 = (List<Map<String, Object>>) documentSnapshot.get("Artists10");
+                    //List<Map<String, Object>> ArtistsLong10 = (List<Map<String, Object>>) documentSnapshot.get("ArtistsLong10");
+                    //List<Map<String, Object>> ArtistsMedium10 = (List<Map<String, Object>>) documentSnapshot.get("ArtistsMedium10");
+                    List<Map<String, Object>> Tracks10 = (List<Map<String, Object>>) documentSnapshot.get("Tracks10");
+                    //List<Map<String, Object>> TracksLong10 = (List<Map<String, Object>>) documentSnapshot.get("TracksLong10");
+                    //List<Map<String, Object>> TracksMedium10 = (List<Map<String, Object>>) documentSnapshot.get("TracksMedium10");
 
-                // Set each thing in fireModel to what's in firebase
-                fireModel.setArtists10List(setFireModelArtists(Artists10));
-                fireModel.setArtistsMedium10List(setFireModelArtists(ArtistsMedium10));
-                fireModel.setArtistsLong10List(setFireModelArtists(ArtistsLong10));
+                    // Set each thing in fireModel to what's in firebase
+                    fireModel.setArtists10List(setFireModelArtists(Artists10));
+                    //fireModel.setArtistsMedium10List(setFireModelArtists(ArtistsMedium10));
+                    //fireModel.setArtistsLong10List(setFireModelArtists(ArtistsLong10));
 
-                fireModel.setTracks10List(setFireModelTracks(Tracks10));
-                fireModel.setTracksMedium10List(setFireModelTracks(TracksMedium10));
-                fireModel.setTracksLong10List(setFireModelTracks(TracksLong10));
+                    fireModel.setTracks10List(setFireModelTracks(Tracks10));
+                    //fireModel.setTracksMedium10List(setFireModelTracks(TracksMedium10));
+                    //fireModel.setTracksLong10List(setFireModelTracks(TracksLong10));
 
-                fillRecyclerViewArtists(fireModel.getArtists10List());
+                    fillRecyclerViewArtists(fireModel.getArtists10List());
+                } catch (Exception e) {
+                    getUserProfile();
+                }
             } else {
                 // Document does not exist
                 Log.d(TAG, "DOCREF UNSUCCESSFUL");
