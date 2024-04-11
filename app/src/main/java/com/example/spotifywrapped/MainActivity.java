@@ -67,6 +67,10 @@ public class MainActivity extends AppCompatActivity {
     // Boolean helpers
     private boolean isProfileBtnClicked = false;
     private static boolean isAccountDeleted = false;
+    private Button linkSpotifyBtn;
+    private Button past_button;
+    private Spinner mainPageName;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +103,14 @@ public class MainActivity extends AppCompatActivity {
             fillRecyclerView(fireModel.getArtists10List());
         }
 
-        // Get User Data Listener
+        // Set the click listeners for the buttons
+
+        past_button = findViewById(R.id.past_button);
+        past_button.setOnClickListener(view -> {
+            Intent intent = new Intent(this, PastWrappedActivity.class);
+            startActivity(intent);
+        });
+
         linkSpotifyBtn.setOnClickListener(v -> {
             // Call getToken() to link Spotify
             Log.d("Token", "Getting token");
