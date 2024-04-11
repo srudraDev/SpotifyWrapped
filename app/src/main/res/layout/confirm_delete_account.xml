@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:minWidth="400dp"
+    android:layout_height="250dp"
+    android:background="@android:color/white"
+    android:layout_marginBottom="15dp"
+    tools:context=".SettingsPage"
+    >
+
+    <ImageView
+        android:id="@+id/warningImage"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:src="@drawable/img"
+        android:layout_marginTop="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/textView2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.458" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="Be Careful:"
+        android:textSize="25dp"
+        app:layout_constraintBottom_toTopOf="@+id/textView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/warningImage"
+        app:layout_constraintVertical_bias="0.681" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:text="Deleting your account cannot be undone.\nWould you still like to delete it?"
+        android:textSize="15dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textView2" />
+
+    <Button
+        android:id="@+id/button_yes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:backgroundTint="@color/lightGray"
+        android:onClick="delete_account_button"
+        android:text="Yes, delete it."
+        android:textColor="@color/black"
+        android:textSize="15dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/button_no"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintVertical_bias="0.307" />
+
+    <Button
+        android:id="@+id/button_no"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:backgroundTint="@color/lightGray"
+        android:onClick="myDialog_hide"
+        android:text="Don't delete it"
+        android:textColor="@color/black"
+        android:textSize="15dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.9"
+        app:layout_constraintStart_toEndOf="@+id/button_yes"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintVertical_bias="0.304" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
