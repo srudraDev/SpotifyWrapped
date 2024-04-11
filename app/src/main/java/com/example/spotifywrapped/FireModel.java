@@ -13,7 +13,7 @@ public class FireModel extends ViewModel {
     private String userName;
     private String userId;
     private String userImage;
-    private boolean needReload = true;
+    private boolean needReload = false;
     // Artists
     private List<top10Artists> artists10List = new ArrayList<>();
     private List<top10Artists> artistsLong10List = new ArrayList<>();

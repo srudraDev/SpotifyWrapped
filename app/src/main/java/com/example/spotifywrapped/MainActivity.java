@@ -67,9 +67,7 @@ public class MainActivity extends AppCompatActivity {
     // Boolean helpers
     private boolean isProfileBtnClicked = false;
     private static boolean isAccountDeleted = false;
-    private Button linkSpotifyBtn;
     private Button past_button;
-    private Spinner mainPageName;
 
 
     @Override
@@ -91,18 +89,21 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize FireView
         fireModel = new ViewModelProvider(this).get(FireModel.class);
-        if (fireModel.getNeedReload()) {
-            // Data is null, show link spotify button
-            linkSpotifyBtn.setVisibility(View.VISIBLE);
-            mainPageName.setVisibility(View.INVISIBLE);
-        } else {
-            // Data exists, hide link Spotify button
-            linkSpotifyBtn.setVisibility(View.INVISIBLE);
-            mainPageName.setVisibility(View.VISIBLE);
-            // Load RecyclerView with data from FireModel
-            fillRecyclerView(fireModel.getArtists10List());
-        }
 
+        // if user data can be found in firebase:
+        if (fireModel.getNeedReload()) {
+            getUserProfile();
+        } else {
+            try {
+                loadFireModel();
+                linkSpotifyBtn.setVisibility(View.INVISIBLE);
+                mainPageName.setVisibility(View.VISIBLE);
+            } catch (Exception e) { // if user data cannot be found in firebase:
+                // Let the user know they need to connect their spotify account
+                linkSpotifyBtn.setVisibility(View.VISIBLE);
+                mainPageName.setVisibility(View.INVISIBLE);
+            }
+        }
         // Set the click listeners for the buttons
 
         past_button = findViewById(R.id.past_button);
@@ -113,12 +114,7 @@ public class MainActivity extends AppCompatActivity {
 
         linkSpotifyBtn.setOnClickListener(v -> {
             // Call getToken() to link Spotify
-            Log.d("Token", "Getting token");
             getToken(MainActivity.this);
-            Log.d("Token Done", "Got Token");
-            // Disable linkSpotifyButton
-            isProfileBtnClicked = true;
-            Log.d("Link Spotify Successful", "Linked to Spotify Account Successfully");
         });
         mainPageName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -128,11 +124,13 @@ public class MainActivity extends AppCompatActivity {
                     case 0:
                         // Load data for top 10 artists
                         recyclerView.setAdapter(artistAdapter);
+                        fillRecyclerViewArtists(fireModel.getArtists10List());
                         break;
                     case 1:
                         // Load data for top 10 tracks
                         trackAdapter = new TrackAdapter(trackList);
                         recyclerView.setAdapter(trackAdapter);
+                        fillRecyclerViewTracks(fireModel.getTracks10List());
                         break;
                 }
             }
@@ -145,22 +143,20 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("MYLOG", "within the resume");
-        //check if user has been deleted
+        // Check if user has been deleted
         if (isAccountDeleted) {
-            Log.d("MYLOG", "successfully hit true if statement");
+            Log.d("ACCOUNT", "Account read as DELETED");
 
             isAccountDeleted = false;
             finish();
         }
-        // Check if data is loaded in the FireModel
+        // Check if data is already loaded in the FireModel
         fireModel = new ViewModelProvider(this).get(FireModel.class);
         if (!fireModel.getNeedReload()) {
             // Data exists, hide link Spotify button
             linkSpotifyBtn.setVisibility(View.INVISIBLE);
             mainPageName.setVisibility(View.VISIBLE);
-            // Reload RecyclerView with data from FireModel
-            fillRecyclerView(fireModel.getArtists10List());
+            fillRecyclerViewArtists(fireModel.getArtists10List());
         }
     }
 
@@ -255,23 +251,12 @@ public class MainActivity extends AppCompatActivity {
                     top10Tracks.TrackFetcher longTrackFetcher = new top10Tracks.TrackFetcher("long_term");
                     List<top10Tracks> parsedLongTracksData = longTrackFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
 
-                    // Fill fireModel with data
-                    fireModel.setArtists10List(parsedShortArtistData);
-                    fireModel.setArtistsMedium10List(parsedMediumArtistData);
-                    fireModel.setArtistsLong10List(parsedLongArtistData);
-                    fireModel.setTracks10List(parsedShortTracksData);
-                    fireModel.setTracksMedium10List(parsedMediumTracksData);
-                    fireModel.setTracksLong10List(parsedLongTracksData);
-                    fireModel.setUserName(displayName);
-                    fireModel.setUserId(spotifyUserId);
-                    fireModel.setUserImage(userProfileImageURL);
-
                     // Put all the user data in a HashMap
                     Map<String, Object> user = new HashMap<>();
                     user.put("displayName", displayName);
                     user.put("spotifyId", spotifyUserId);
-                    user.put("ArtistsShort10", parsedShortArtistData);
-                    user.put("TracksShort10", parsedShortTracksData);
+                    user.put("Artists10", parsedShortArtistData);
+                    user.put("Tracks10", parsedShortTracksData);
                     user.put("ArtistsMedium10", parsedMediumArtistData);
                     user.put("TracksMedium10", parsedMediumTracksData);
                     user.put("ArtistsLong10", parsedLongArtistData);
@@ -286,11 +271,12 @@ public class MainActivity extends AppCompatActivity {
                     // Update firebase data with new user data
                     db.collection("users").document(userID)
                             .update(user)
-                            .addOnSuccessListener(v ->
-                                    fillRecyclerView(fireModel.getArtists10List()))
                             .addOnFailureListener(e ->
                                     Log.w(TAG, "Error updating user data", e)
                             );
+
+                    // Load new Firebase data into FireModel
+                    loadFireModel();
                 } catch (JSONException e) {
                     Log.d("JSON", "Failed to parse data: " + e);
                     Toast.makeText(MainActivity.this, "Failed to parse data, watch Logcat for more details",
@@ -304,16 +290,101 @@ public class MainActivity extends AppCompatActivity {
      * Fill RecyclerView with data
      * @param artistData List of top 10 artists
      */
-    private void fillRecyclerView(List<top10Artists> artistData) {
+    private void fillRecyclerViewArtists(List<top10Artists> artistData) {
         // Clear existing data
         artistList.clear();
 
         // Add new data
         artistList.addAll(artistData);
-        System.out.println(artistData);
 
         // Notify adapter about data change
         artistAdapter.notifyDataSetChanged();
+    }
+
+    private void fillRecyclerViewTracks(List<top10Tracks> trackData) {
+        // Clear existing data
+        trackList.clear();
+
+        // Add new data
+        trackList.addAll(trackData);
+
+        // Notify adapter about data change
+        trackAdapter.notifyDataSetChanged();
+    }
+
+    public List<top10Artists> setFireModelArtists(List<Map<String, Object>> ArtistList) {
+        List<top10Artists> newArtistList = new ArrayList<>();
+        for (Map<String, Object> artistData : ArtistList) {
+            String artistName = (String) artistData.get("name");
+            List<String> genres = (List<String>) artistData.get("genres");
+            String imageUrl = (String) artistData.get("secondImageUrl");
+
+            top10Artists newArtist = new top10Artists(artistName, genres, imageUrl);
+            newArtistList.add(newArtist);
+        }
+        return newArtistList;
+    }
+
+    public List<top10Tracks> setFireModelTracks(List<Map<String, Object>> TrackList) {
+        List<top10Tracks> newTrackList = new ArrayList<>();
+        for (Map<String, Object> trackData : TrackList) {
+            String name = (String) trackData.get("name");
+            String artistName = (String) trackData.get("artistName");
+            String albumName = (String) trackData.get("albumName");
+            String imageUrl = (String) trackData.get("secondImageUrl");
+
+            top10Tracks newTrack = new top10Tracks(name, artistName, albumName, imageUrl);
+            newTrackList.add(newTrack);
+        }
+        return newTrackList;
+    }
+
+    public void loadFireModel() {
+        // Get Current User id from FireBase
+        firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        String userID = currentUser.getUid(); // Will never be null (must have account to log in)
+
+        String documentPath = "users/" + userID;
+        DocumentReference docRef = db.document(documentPath);
+
+        // FILL FIREMODEL FROM FIREBASE
+        Log.d("TEST", "ATTEMPTING DOCREF");
+        docRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                Log.d("TEST", "DOCREF SUCCESSFUL");
+                // Document exists, extract the data
+                // Assuming the structure of your document is similar to how you parsed the Spotify API response
+                fireModel.setUserName(documentSnapshot.getString("userName"));
+                fireModel.setUserId(documentSnapshot.getString("userId"));
+                fireModel.setUserImage(documentSnapshot.getString("userImage"));
+
+                // Assuming you have stored the parsed artist data as an array in Firestore
+                List<Map<String, Object>> Artists10 = (List<Map<String, Object>>) documentSnapshot.get("Artists10");
+                List<Map<String, Object>> ArtistsLong10 = (List<Map<String, Object>>) documentSnapshot.get("ArtistsLong10");
+                List<Map<String, Object>> ArtistsMedium10 = (List<Map<String, Object>>) documentSnapshot.get("ArtistsMedium10");
+                List<Map<String, Object>> Tracks10 = (List<Map<String, Object>>) documentSnapshot.get("Tracks10");
+                List<Map<String, Object>> TracksLong10 = (List<Map<String, Object>>) documentSnapshot.get("TracksLong10");
+                List<Map<String, Object>> TracksMedium10 = (List<Map<String, Object>>) documentSnapshot.get("TracksMedium10");
+
+                // Set each thing in fireModel to what's in firebase
+                fireModel.setArtists10List(setFireModelArtists(Artists10));
+                fireModel.setArtistsMedium10List(setFireModelArtists(ArtistsMedium10));
+                fireModel.setArtistsLong10List(setFireModelArtists(ArtistsLong10));
+
+                fireModel.setTracks10List(setFireModelTracks(Tracks10));
+                fireModel.setTracksMedium10List(setFireModelTracks(TracksMedium10));
+                fireModel.setTracksLong10List(setFireModelTracks(TracksLong10));
+
+                fillRecyclerViewArtists(fireModel.getArtists10List());
+            } else {
+                // Document does not exist
+                Log.d(TAG, "DOCREF UNSUCCESSFUL");
+            }
+        }).addOnFailureListener(e -> {
+            // Error getting document
+            Log.w(TAG, "Error getting document", e);
+        });
     }
 
     public void initiateRecyclerView(RecyclerView rv) {
