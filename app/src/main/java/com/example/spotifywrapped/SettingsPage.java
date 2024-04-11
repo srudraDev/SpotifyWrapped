@@ -96,7 +96,7 @@ public class SettingsPage extends AppCompatActivity {
         Log.d("MYLOG", "Auth has been done!");
         FirebaseUser currentUser = auth.getCurrentUser();
 
-        reference = FirebaseDatabase.getInstance().getReference("users").child(currentUser.getUid());
+//        reference = FirebaseDatabase.getInstance().getReference("users").child(currentUser.getUid());
 
         editEmailText = (EditText) myDialog.findViewById(R.id.edit_account_email);
         editPasswordText = (EditText) myDialog.findViewById(R.id.edit_account_password);
@@ -108,19 +108,20 @@ public class SettingsPage extends AppCompatActivity {
 
         //currentUser.sendEmailVerification();
         currentUser.verifyBeforeUpdateEmail(newEmailText)
+//        currentUser.updateEmail(newEmailText)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         Log.d("MYLOG", "User email address updated.");
 
-                        Map<String, Object> updates = new HashMap<>();
-                        updates.put("email", newEmailText);
-
-                        reference.updateChildren(updates);
+//                        Map<String, Object> updates = new HashMap<>();
+//                        updates.put("email", newEmailText);
+//
+//                        reference.updateChildren(updates);
 
                         Log.d("MYLOG", currentUser.getEmail());
-                        myDialog.hide();
+//                        myDialog.hide();
                         myDialog.setContentView(R.layout.confirm_email_message);
-                        myDialog.show();
+//                        myDialog.show();
 
                     } else {
                         Toast.makeText(this, "Couldn't update email", Toast.LENGTH_SHORT);
