@@ -25,7 +25,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Please follow instructions in your original email.\nChanges will not be done until then."
+        android:text="Please follow instructions in your newly entered email.\nChanges will not be done until then."
         android:textSize="15dp"
         android:gravity="center"
         />
