@@ -58,8 +58,8 @@ public class SettingsPage extends AppCompatActivity {
         Log.d("MYLOG", "continues before delete");
         currentUser.delete();
 
-        Log.d("MYLOG", "successfully deleted user");
-        MainActivity.setAccountDeleted(true);
+        Log.d("MYLOGGG", "successfully deleted user");
+        WrappedFragment.setAccountDeleted(true);
 
         Log.d("MYLOG", "successfully set deleted true");
         finish();

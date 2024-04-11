@@ -40,7 +40,26 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".PastWrappedActivity"
+            android:name=".WrappedFragment"
+            android:exported="true"
+            android:theme="@style/Theme.SpotifyWrapped">
+            <intent-filter>
+                <action android:name="android.intent.action.ASSIST" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".PastWrappedFragment"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.ASSIST" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".DuoWrappedFragment"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.ASSIST" />

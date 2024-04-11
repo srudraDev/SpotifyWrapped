@@ -28,13 +28,13 @@ public class PublicWrappedActivity extends AppCompatActivity {
 
         duo_button = findViewById(R.id.duo_button);
         duo_button.setOnClickListener(view -> {
-            Intent intent = new Intent(this, DuoWrappedActivity.class);
+            Intent intent = new Intent(this, DuoWrappedFragment.class);
             startActivity(intent);
         });
 
         past_button = findViewById(R.id.past_button);
         past_button.setOnClickListener(view -> {
-            Intent intent = new Intent(this, PastWrappedActivity.class);
+            Intent intent = new Intent(this, PastWrappedFragment.class);
             startActivity(intent);
         });
 

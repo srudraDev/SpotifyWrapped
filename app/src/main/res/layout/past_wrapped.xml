@@ -5,7 +5,7 @@
     android:id="@+id/past_wrapped"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".PastWrappedActivity">
+    tools:context=".PastWrappedFragment">
 
     <Button
         android:id="@+id/settings_button"

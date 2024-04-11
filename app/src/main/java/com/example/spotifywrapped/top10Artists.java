@@ -55,5 +55,6 @@ public class top10Artists extends top10Items{
             Log.d("parseJSON", wantedData.get(0).name);
             return wantedData;
         }
+
     }
 }
