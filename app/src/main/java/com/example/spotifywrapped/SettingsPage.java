@@ -119,9 +119,9 @@ public class SettingsPage extends AppCompatActivity {
 //                        reference.updateChildren(updates);
 
                         Log.d("MYLOG", currentUser.getEmail());
-//                        myDialog.hide();
+                        myDialog.hide();
                         myDialog.setContentView(R.layout.confirm_email_message);
-//                        myDialog.show();
+                        myDialog.show();
 
                     } else {
                         Toast.makeText(this, "Couldn't update email", Toast.LENGTH_SHORT);
