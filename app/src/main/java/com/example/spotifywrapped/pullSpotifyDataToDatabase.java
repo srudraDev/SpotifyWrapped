@@ -1,6 +1,9 @@
 package com.example.spotifywrapped;
 
+import static com.example.spotifywrapped.secret.spotify_client_id;
+
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
@@ -11,7 +14,7 @@ import com.spotify.sdk.android.auth.AuthorizationResponse;
 
 import okhttp3.Call;
 public class pullSpotifyDataToDatabase {
-    public static final String CLIENT_ID = "628ea4720df744c981eaa390fba4132e";
+    public static final String CLIENT_ID = spotify_client_id;
     public static final String REDIRECT_URI = "spotifywrapped://auth";
     public static final FirebaseFirestore db = FirebaseFirestore.getInstance();
     public static final int AUTH_TOKEN_REQUEST_CODE = 0;
@@ -25,20 +28,12 @@ public class pullSpotifyDataToDatabase {
      * What is token?
      * https://developer.spotify.com/documentation/general/guides/authorization-guide/
      */
-    public static void getToken(Activity activity) {
-        final AuthorizationRequest request = getAuthenticationRequest(AuthorizationResponse.Type.TOKEN);
-        AuthorizationClient.openLoginActivity(activity, AUTH_TOKEN_REQUEST_CODE, request);
-    }
+    public static Intent getToken(Activity activity) {
+        AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI);
+        builder.setScopes(new String[]{"user-read-private", "user-read-email", "user-top-read"});
+        AuthorizationRequest request = builder.build();
 
-    /**
-     * Get code from Spotify
-     * This method will open the Spotify login activity and get the code
-     * What is code?
-     * https://developer.spotify.com/documentation/general/guides/authorization-guide/
-     */
-    public static void getCode(Activity activity) {
-        final AuthorizationRequest request = getAuthenticationRequest(AuthorizationResponse.Type.CODE);
-        AuthorizationClient.openLoginActivity(activity, AUTH_CODE_REQUEST_CODE, request);
+        return AuthorizationClient.createLoginActivityIntent(activity, request);
     }
 
     /**

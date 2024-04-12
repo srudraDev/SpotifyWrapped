@@ -2,26 +2,18 @@ package com.example.spotifywrapped;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Spinner;
-import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import org.json.JSONException;
-
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-public class PastWrappedActivity extends AppCompatActivity {
+public class PastWrappedFragment extends Fragment {
     private Button present_button;
     private Button duo_button;
     private Button past_button;
@@ -33,9 +25,10 @@ public class PastWrappedActivity extends AppCompatActivity {
     private List<top10Artists> artistList2;
     private Spinner time_frame_spinner;
 
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.past_wrapped);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.past_wrapped, container, false);
 //        time_frame_spinner = findViewById(R.id.time_frame_spinner);
 
         // RecyclerView
@@ -57,29 +50,30 @@ public class PastWrappedActivity extends AppCompatActivity {
 
 
         // Buttons to navigate between wrapped pages
-        present_button = findViewById(R.id.present_button);
-        present_button.setOnClickListener(view -> {
-            Intent intent = new Intent(this, MainActivity.class);
+        present_button = view.findViewById(R.id.present_button);
+        duo_button = view.findViewById(R.id.duo_button);
+        past_button = view.findViewById(R.id.past_button);
+        public_button = view.findViewById(R.id.public_button);
+        settings_button = view.findViewById(R.id.settings_button);
+
+        present_button.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), WrappedFragment.class);
             startActivity(intent);
         });
-        duo_button = findViewById(R.id.duo_button);
-        duo_button.setOnClickListener(view -> {
-            Intent intent = new Intent(this, DuoWrappedActivity.class);
+        duo_button.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), DuoWrappedActivity.class);
             startActivity(intent);
         });
-        past_button = findViewById(R.id.past_button);
-        past_button.setOnClickListener(view -> {
-            Intent intent = new Intent(this, PastWrappedActivity.class);
+        past_button.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), PastWrappedActivity.class);
             startActivity(intent);
         });
-        public_button = findViewById(R.id.public_button);
-        public_button.setOnClickListener(view -> {
-            Intent intent = new Intent(this, PublicWrappedActivity.class);
+        public_button.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), PublicWrappedActivity.class);
             startActivity(intent);
         });
-        settings_button = findViewById(R.id.settings_button);
-        settings_button.setOnClickListener(view -> {
-            Intent intent = new Intent(this, SettingsPage.class);
+        settings_button.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), SettingsPage.class);
             startActivity(intent);
         });
 
@@ -105,12 +99,11 @@ public class PastWrappedActivity extends AppCompatActivity {
 //            }
 //        });
 
-    }
 
-    /**
-     * Fill RecyclerView with data
-     * @param artistData List of top 10 artists
-     */
+        /**
+         * Fill RecyclerView with data
+         * @param artistData List of top 10 artists
+         */
 //    private void fillRecyclerView(List<top10Artists> artistData) {
 //        // Clear existing data
 //        artistList.clear();
@@ -125,4 +118,6 @@ public class PastWrappedActivity extends AppCompatActivity {
 //        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 //        recyclerView.setAdapter(artistAdapter);
 //    }
+        return view;
+    }
 }

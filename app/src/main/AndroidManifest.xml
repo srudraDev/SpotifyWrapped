@@ -40,7 +40,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".WrappedMainActivity"
+            android:name=".WrappedFragment"
+            android:exported="true"
+            android:theme="@style/Theme.SpotifyWrapped">
+            <intent-filter>
+                <action android:name="android.intent.action.ASSIST" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".PastWrappedFragment"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.ASSIST" />
@@ -49,7 +59,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".PastWrappedActivity"
+            android:name=".DuoWrappedFragment"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.ASSIST" />
@@ -57,6 +67,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".DuoWrappedActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.ASSIST" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".PublicWrappedActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.ASSIST" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".SettingsPage"
             android:exported="true"
             />
