@@ -1,6 +1,5 @@
 package com.example.spotifywrapped;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,7 +55,6 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
         String trackName = trackList.get(position).getName();
         String artistName = trackList.get(position).getArtistName();
         String albumName = trackList.get(position).getAlbumName();
-        Log.d("HOLLAAAAAA", albumName);
         Glide.with(holder.trackImageView.getContext())
                 .load(trackList.get(position).getSecondImageUrl())
                 .into(holder.trackImageView);

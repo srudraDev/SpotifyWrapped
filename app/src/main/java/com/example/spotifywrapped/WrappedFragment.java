@@ -11,8 +11,8 @@ import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -58,7 +58,6 @@ public class WrappedFragment extends Fragment {
     private FirebaseFirestore db;
     // Views
     private RecyclerView recyclerView;
-    private Button linkSpotifyBtn;
     private Spinner mainPageName;
     // Adapters
     private ArtistAdapter artistAdapter;
@@ -66,7 +65,8 @@ public class WrappedFragment extends Fragment {
     // User lists
     private List<top10Artists> artistList;
     private List<top10Tracks> trackList;
-    // Boolean helpers
+    // counters
+    private int loadCounter = 0;
     private static boolean isAccountDeleted = false;
 
     public WrappedFragment() {
@@ -86,7 +86,7 @@ public class WrappedFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_wrapped, container, false);
 
         // Initialize views and variables
-        linkSpotifyBtn = view.findViewById(R.id.link_spotify_btn);
+        Button linkSpotifyBtn = view.findViewById(R.id.link_spotify_btn);
         mainPageName = view.findViewById(R.id.typeOfWrapped);
         recyclerView = view.findViewById(R.id.recycler_view_top_artists);
         //past_button = view.findViewById(R.id.past_button);
@@ -99,9 +99,15 @@ public class WrappedFragment extends Fragment {
         // Automatically sets RV to artists
         initiateRecyclerView(recyclerView);
 
-        // Do everything lol
+        /*
+          Get data from FireBase and attempt to load profile. Will call GetUserProfile if
+          data is not fully available in FireBase
+          Also loads data for the other pages. Since this page pops up first, it will prime
+          the others for usage
+        */
         loadData();
 
+        // The DropDown menu for selecting Artists or Tracks
         mainPageName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -123,6 +129,7 @@ public class WrappedFragment extends Fragment {
             }
         });
 
+        // Send the user to spotify login screen if they do not have an account (launched by linkSpotifyBtn)
         spotifyAuthLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
@@ -136,8 +143,9 @@ public class WrappedFragment extends Fragment {
                             getUserProfile();
                         }
                     }
-                });
+        });
 
+        // Gets the token for the user and primes the spotifyAuthLauncher
         linkSpotifyBtn.setOnClickListener(v -> {
             // Call getToken() to link Spotify
             Log.d("TOKEN", "GET TOKEN");
@@ -157,6 +165,7 @@ public class WrappedFragment extends Fragment {
 
             isAccountDeleted = false;
 
+            // Send user to Login Screen if account was deleted
             Intent intent = new Intent(requireActivity(), LoginActivity.class);
             startActivity(intent);
 
@@ -165,10 +174,10 @@ public class WrappedFragment extends Fragment {
     }
 
     public void getUserProfile() {
-        Log.d("TEST", "GET USER PROFILE");
+        Log.d("GET USER", "GET USER PROFILE");
 
         if (mAccessToken == null) {
-            Log.d("TEST ERROR", "NO ACCESS TOKEN");
+            Log.d("GET USER ERROR", "NO ACCESS TOKEN");
             return;
         }
 
@@ -182,18 +191,19 @@ public class WrappedFragment extends Fragment {
 
         mCall.enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Log.d("HTTP", "Failed to fetch data: " + e);
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 try {
                     Looper.prepare();
                 } catch (Exception e) {
-                    Log.d("Looper", "Looper already prepared: " + e);
+                    Log.d("LOOPER", "LOOPER PREPARED");
                 }
                 try {
+                    assert response.body() != null;
                     String responseBody = response.body().string();
 
                     final JSONObject jsonObject = new JSONObject(responseBody);
@@ -207,7 +217,7 @@ public class WrappedFragment extends Fragment {
                         userProfileImageURL = userProfileImageArray.getJSONObject(0).getString("url");
                     } catch (Exception e) {
                         userProfileImageURL = "@drawable/ic_default_profile_image"; //a default user profile image
-                        Log.d("ProfileImageError", "No Profile Image Found");
+                        Log.d("PROFILE IMAGE", "NO PROFILE IMAGE FOUND");
                     }
 
                     // Set User Artist data
@@ -245,6 +255,7 @@ public class WrappedFragment extends Fragment {
                     // Get Current User id from FireBase
                     firebaseAuth = FirebaseAuth.getInstance();
                     FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+                    assert currentUser != null;
                     String userID = currentUser.getUid(); // Will never be null (must have account to log in)
 
                     // Update firebase data with new user data
@@ -263,47 +274,59 @@ public class WrappedFragment extends Fragment {
     }
 
     public void loadData() {
-        // Get Current User id from FireBase
-        firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        String userID = currentUser.getUid(); // Will never be null (must have account to log in)
+        try {
+            // Get Current User id from FireBase
+            firebaseAuth = FirebaseAuth.getInstance();
+            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+            assert currentUser != null;
+            String userID = currentUser.getUid(); // Will never be null (must have account to log in)
 
-        String documentPath = "users/" + userID;
-        DocumentReference docRef = db.document(documentPath);
+            String documentPath = "users/" + userID;
+            DocumentReference docRef = db.document(documentPath);
 
-        // FILL DATA FROM FIREBASE
-        Log.d("TEST", "ATTEMPTING DOCREF");
-        docRef.get().addOnSuccessListener(documentSnapshot -> {
-            if (documentSnapshot.exists()) {
-                Log.d("TEST", "DOCREF SUCCESSFUL");
-                // Document exists, extract the data
-                // Assuming the structure of your document is similar to how you parsed the Spotify API response
-                try {
-                    // Get artist and track arrays from firebase
-                    List<Map<String, Object>> Artists10 = (List<Map<String, Object>>) documentSnapshot.get("Artists10");
-                    List<Map<String, Object>> Tracks10 = (List<Map<String, Object>>) documentSnapshot.get("Tracks10");
+            // FILL DATA FROM FIREBASE
+            docRef.get().addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    Log.d("TEST", "DOCREF SUCCESSFUL");
+                    // Document exists, extract the data
+                    // Assuming the structure of your document is similar to how you parsed the Spotify API response
+                    try {
+                        // Get artist and track arrays from firebase
+                        List<Map<String, Object>> Artists10 = (List<Map<String, Object>>) documentSnapshot.get("Artists10");
+                        List<Map<String, Object>> Tracks10 = (List<Map<String, Object>>) documentSnapshot.get("Tracks10");
 
-                    // Set each item in both lists from firebase
-                    artistList = setArtists(Artists10);
-                    trackList = setTracks(Tracks10);
+                        // Set each item in both lists from firebase
+                        artistList = setArtists(Artists10);
+                        trackList = setTracks(Tracks10);
 
-                    artistAdapter = new ArtistAdapter(artistList);
-                    trackAdapter = new TrackAdapter(trackList);
+                        if (artistList == null|| trackList == null) {
+                            throw new java.lang.IllegalArgumentException("artistList or trackList is null");
+                        }
 
-                    linkSpotifyBtn.setVisibility(View.INVISIBLE);
-                    mainPageName.setVisibility(View.VISIBLE);
-                } catch (Exception e) {
-                    System.out.println("E: " + e);
-                    getUserProfile();
+                        artistAdapter = new ArtistAdapter(artistList);
+                        trackAdapter = new TrackAdapter(trackList);
+
+                        mainPageName.setVisibility(View.VISIBLE);
+                    } catch (Exception e) {
+                        System.out.println(loadCounter);
+                        if (loadCounter < 10) {
+                            getUserProfile();
+                            loadCounter++;
+                        } else {
+                            Log.d("LOAD ERROR", "ATTEMPTED TO LOAD MORE THAN 10 TIMES");
+                        }
+                    }
+                } else {
+                    // Document does not exist
+                    Log.d(TAG, "DOCREF UNSUCCESSFUL");
                 }
-            } else {
-                // Document does not exist
-                Log.d(TAG, "DOCREF UNSUCCESSFUL");
-            }
-        }).addOnFailureListener(e -> {
-            // Error getting document
-            Log.w(TAG, "Error getting document", e);
-        });
+            }).addOnFailureListener(e -> {
+                // Error getting document
+                Log.w(TAG, "Error getting document", e);
+            });
+        } catch (Exception e) {
+            Log.d("LOAD", "MAJOR LOAD ERROR: " + e);
+        }
     }
 
     public void initiateRecyclerView(RecyclerView rv) {
