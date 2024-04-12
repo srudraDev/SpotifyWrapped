@@ -24,7 +24,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -69,9 +68,7 @@ public class WrappedFragment extends Fragment {
     private List<top10Artists> artistList;
     private List<top10Tracks> trackList;
     // Boolean helpers
-    private boolean isProfileBtnClicked = false;
     private static boolean isAccountDeleted = false;
-    private Button past_button;
 
     public WrappedFragment() {
         // Required empty public constructor
@@ -99,20 +96,16 @@ public class WrappedFragment extends Fragment {
         artistList = new ArrayList<>();
         trackList = new ArrayList<>();
         artistAdapter = new ArtistAdapter(artistList);
+        trackAdapter = new TrackAdapter(trackList);
+        // Automatically sets RV to artists
         initiateRecyclerView(recyclerView);
 
+        // Initialize FireView
         fireModel = new ViewModelProvider(this).get(FireModel.class);
-        if (fireModel.getNeedReload()) {
-            // Data is null, show link spotify button
-            linkSpotifyBtn.setVisibility(View.VISIBLE);
-            mainPageName.setVisibility(View.INVISIBLE);
-        } else {
-            // Data exists, hide link Spotify button
-            linkSpotifyBtn.setVisibility(View.INVISIBLE);
-            mainPageName.setVisibility(View.VISIBLE);
-            // Load RecyclerView with data from FireModel
-            fillRecyclerView(fireModel.getArtists10List());
-        }
+
+        // Do everything lol
+        loadData();
+
         mainPageName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -124,7 +117,6 @@ public class WrappedFragment extends Fragment {
                         break;
                     case 1:
                         // Load data for top 10 tracks
-                        trackAdapter = new TrackAdapter(trackList);
                         recyclerView.setAdapter(trackAdapter);
                         break;
                 }
@@ -152,13 +144,9 @@ public class WrappedFragment extends Fragment {
 
         linkSpotifyBtn.setOnClickListener(v -> {
             // Call getToken() to link Spotify
-            Log.d("Token", "Getting token");
+            Log.d("TOKEN", "GET TOKEN");
             Intent intent = getToken(requireActivity());
             spotifyAuthLauncher.launch(intent);
-            Log.d("Token Done", "Got Token");
-            // Disable linkSpotifyButton
-            isProfileBtnClicked = true;
-            Log.d("Link Spotify Successful", "Linked to Spotify Account Successfully");
         });
 
         return view;
@@ -167,11 +155,9 @@ public class WrappedFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Log.d("MYLOG", "within the resume");
 
         // Check if user has been deleted
         if (isAccountDeleted) {
-            Log.d("MYLOG", "successfully hit true if statement");
 
             isAccountDeleted = false;
 
@@ -180,23 +166,13 @@ public class WrappedFragment extends Fragment {
 
             requireActivity().finish();
         }
-
-        // Check if data is loaded in the FireModel
-        fireModel = new ViewModelProvider(requireActivity()).get(FireModel.class);
-        if (!fireModel.getNeedReload()) {
-            // Data exists, hide link Spotify button
-            linkSpotifyBtn.setVisibility(View.INVISIBLE);
-            mainPageName.setVisibility(View.VISIBLE);
-            // Reload RecyclerView with data from FireModel
-            fillRecyclerView(fireModel.getArtists10List());
-        }
     }
 
     public void getUserProfile() {
-        fireModel.setNeedReload(false);
+        Log.d("TEST", "GET USER PROFILE");
 
         if (mAccessToken == null) {
-            Toast.makeText(this.getContext(), "You need to get an access token first!", Toast.LENGTH_SHORT).show();
+            Log.d("TEST ERROR", "NO ACCESS TOKEN");
             return;
         }
 
@@ -212,8 +188,6 @@ public class WrappedFragment extends Fragment {
             @Override
             public void onFailure(Call call, IOException e) {
                 Log.d("HTTP", "Failed to fetch data: " + e);
-                Toast.makeText(getContext(), "Failed to fetch data, watch Logcat for more details",
-                        Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -225,12 +199,6 @@ public class WrappedFragment extends Fragment {
                 }
                 try {
                     String responseBody = response.body().string();
-                    //Log.d("ResponseBodyUser", responseBody);
-
-                    firebaseAuth = FirebaseAuth.getInstance();
-                    FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-                    String userID = currentUser.getUid(); // Will never be null (must have account to log in)
-                    //DocumentReference userRef = db.collection("users").document(userID);
 
                     final JSONObject jsonObject = new JSONObject(responseBody);
 
@@ -266,23 +234,12 @@ public class WrappedFragment extends Fragment {
                     top10Tracks.TrackFetcher longTrackFetcher = new top10Tracks.TrackFetcher("long_term");
                     List<top10Tracks> parsedLongTracksData = longTrackFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
 
-                    // Fill fireModel with data
-                    fireModel.setArtists10List(parsedShortArtistData);
-                    fireModel.setArtistsMedium10List(parsedMediumArtistData);
-                    fireModel.setArtistsLong10List(parsedLongArtistData);
-                    fireModel.setTracks10List(parsedShortTracksData);
-                    fireModel.setTracksMedium10List(parsedMediumTracksData);
-                    fireModel.setTracksLong10List(parsedLongTracksData);
-                    fireModel.setUserName(displayName);
-                    fireModel.setUserId(spotifyUserId);
-                    fireModel.setUserImage(userProfileImageURL);
-
                     // Put all the user data in a HashMap
                     Map<String, Object> user = new HashMap<>();
                     user.put("displayName", displayName);
                     user.put("spotifyId", spotifyUserId);
-                    user.put("ArtistsShort10", parsedShortArtistData);
-                    user.put("TracksShort10", parsedShortTracksData);
+                    user.put("Artists10", parsedShortArtistData);
+                    user.put("Tracks10", parsedShortTracksData);
                     user.put("ArtistsMedium10", parsedMediumArtistData);
                     user.put("TracksMedium10", parsedMediumTracksData);
                     user.put("ArtistsLong10", parsedLongArtistData);
@@ -290,41 +247,103 @@ public class WrappedFragment extends Fragment {
                     user.put("profilePic", userProfileImageURL);
 
                     // Get Current User id from FireBase
+                    firebaseAuth = FirebaseAuth.getInstance();
+                    FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+                    String userID = currentUser.getUid(); // Will never be null (must have account to log in)
 
                     // Update firebase data with new user data
                     db.collection("users").document(userID)
                             .update(user)
-                            .addOnSuccessListener(v ->
-                                    fillRecyclerView(fireModel.getArtists10List()))
                             .addOnFailureListener(e ->
                                     Log.w(TAG, "Error updating user data", e)
                             );
+                    // Load new Firebase data into FireModel
+                    loadData();
                 } catch (JSONException e) {
                     Log.d("JSON", "Failed to parse data: " + e);
-                    Toast.makeText(getContext(), "Failed to parse data, watch Logcat for more details",
-                            Toast.LENGTH_SHORT).show();
                 }
             }
+        });
+    }
+
+    public void loadData() {
+        // Get Current User id from FireBase
+        firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        String userID = currentUser.getUid(); // Will never be null (must have account to log in)
+
+        String documentPath = "users/" + userID;
+        DocumentReference docRef = db.document(documentPath);
+
+        // FILL FIREMODEL FROM FIREBASE
+        Log.d("TEST", "ATTEMPTING DOCREF");
+        docRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                Log.d("TEST", "DOCREF SUCCESSFUL");
+                // Document exists, extract the data
+                // Assuming the structure of your document is similar to how you parsed the Spotify API response
+                try {
+                    // Get artist and track arrays
+                    List<Map<String, Object>> Artists10 = (List<Map<String, Object>>) documentSnapshot.get("Artists10");
+                    List<Map<String, Object>> Tracks10 = (List<Map<String, Object>>) documentSnapshot.get("Tracks10");
+
+                    // Set each thing in fireModel to what's in firebase
+                    artistList = setArtists(Artists10);
+                    trackList = setTracks(Tracks10);
+
+                    artistAdapter = new ArtistAdapter(artistList);
+                    trackAdapter = new TrackAdapter(trackList);
+
+                    System.out.println("ARTISTLIST: " + artistList);
+
+                    linkSpotifyBtn.setVisibility(View.INVISIBLE);
+                    mainPageName.setVisibility(View.VISIBLE);
+                } catch (Exception e) {
+                    System.out.println("E: " + e);
+                    getUserProfile();
+                }
+            } else {
+                // Document does not exist
+                Log.d(TAG, "DOCREF UNSUCCESSFUL");
+            }
+        }).addOnFailureListener(e -> {
+            // Error getting document
+            Log.w(TAG, "Error getting document", e);
         });
     }
 
     public void initiateRecyclerView(RecyclerView rv) {
         recyclerView = rv.findViewById(R.id.recycler_view_top_artists);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
-        recyclerView.setAdapter(artistAdapter);
     }
 
-    private void fillRecyclerView(List<top10Artists> artistData) {
-        // Clear existing data
-        artistList.clear();
+    public List<top10Artists> setArtists(List<Map<String, Object>> ArtistList) {
+        List<top10Artists> newArtistList = new ArrayList<>();
+        for (Map<String, Object> artistData : ArtistList) {
+            String artistName = (String) artistData.get("name");
+            List<String> genres = (List<String>) artistData.get("genres");
+            String imageUrl = (String) artistData.get("secondImageUrl");
 
-        // Add new data
-        artistList.addAll(artistData);
-        System.out.println(artistData);
-
-        // Notify adapter about data change
-        artistAdapter.notifyDataSetChanged();
+            top10Artists newArtist = new top10Artists(artistName, genres, imageUrl);
+            newArtistList.add(newArtist);
+        }
+        return newArtistList;
     }
+
+    public List<top10Tracks> setTracks(List<Map<String, Object>> TrackList) {
+        List<top10Tracks> newTrackList = new ArrayList<>();
+        for (Map<String, Object> trackData : TrackList) {
+            String name = (String) trackData.get("name");
+            String artistName = (String) trackData.get("artistName");
+            String albumName = (String) trackData.get("albumName");
+            String imageUrl = (String) trackData.get("secondImageUrl");
+
+            top10Tracks newTrack = new top10Tracks(name, artistName, albumName, imageUrl);
+            newTrackList.add(newTrack);
+        }
+        return newTrackList;
+    }
+
     @Override
     public void onDestroy() {
         cancelCall();
