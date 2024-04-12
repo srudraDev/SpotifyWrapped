@@ -2,13 +2,11 @@ package com.example.spotifywrapped;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,29 +17,25 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 
 public class SettingsPage extends AppCompatActivity {
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private Button delete_button;
-    private LinearLayout layout;
     private Dialog myDialog;
-    private EditText editEmailText, editPasswordText, confirmedEmail, confirmedPassword;
-    private String oldEmail, oldPassword;
+    private EditText confirmedEmail;
+    private EditText confirmedPassword;
     private DatabaseReference reference;
-    private AuthCredential credential;
-
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_page);
-        delete_button = findViewById(R.id.delete_btn);
+        Button delete_button = findViewById(R.id.delete_btn);
+        Button edit_button = findViewById(R.id.edit_btn);
 
         myDialog = new Dialog(this);
         myDialog.setContentView(R.layout.edit_account);
@@ -49,19 +43,15 @@ public class SettingsPage extends AppCompatActivity {
 
 
     public void delete_account_button(View view) {
-        Log.d("MYLOG", "continues before auth");
+        Log.d("DELETE", "ATTEMPTING TO DELETE USER");
         FirebaseAuth auth = FirebaseAuth.getInstance();
-
-        Log.d("MYLOG", "continues before user");
         FirebaseUser currentUser = auth.getCurrentUser();
-
-        Log.d("MYLOG", "continues before delete");
-        currentUser.delete();
-
-        Log.d("MYLOGGG", "successfully deleted user");
-        WrappedFragment.setAccountDeleted(true);
-
-        Log.d("MYLOG", "successfully set deleted true");
+        if (currentUser != null) {
+            currentUser.delete();
+            WrappedFragment.setAccountDeleted(true);
+        } else {
+            Log.d("DELETE", "USER COULD NOT BE DELETED");
+        }
         finish();
     }
 
@@ -81,48 +71,49 @@ public class SettingsPage extends AppCompatActivity {
 
     public void successful_account_edit(View view) {
         FirebaseAuth auth = FirebaseAuth.getInstance();
-        Log.d("MYLOG", "Auth has been done!");
+        Log.d("EDIT", "AUTH SUCCESSFUL");
         FirebaseUser currentUser = auth.getCurrentUser();
 
+        assert currentUser != null;
         reference = FirebaseDatabase.getInstance().getReference("users").child(currentUser.getUid());
 
-        editEmailText = myDialog.findViewById(R.id.edit_account_email);
-        editPasswordText = myDialog.findViewById(R.id.edit_account_password);
+        EditText editEmailText = myDialog.findViewById(R.id.edit_account_email);
+        EditText editPasswordText = myDialog.findViewById(R.id.edit_account_password);
 
         String newEmailText = editEmailText.getText().toString().trim();
-        Log.d("MYLOG", ("email text is : " + newEmailText));
+        Log.d("EDIT", ("EMAIL: " + newEmailText));
 
         String newPasswordText = editPasswordText.getText().toString().trim();
 
         currentUser.verifyBeforeUpdateEmail(newEmailText)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        Log.d("MYLOG", "User email address updated.");
+                        Log.d("EDIT CONFIRM", "User email address updated.");
 
                         Map<String, Object> updates = new HashMap<>();
                         updates.put("email", newEmailText);
 
                         reference.updateChildren(updates);
 
-                        Log.d("MYLOG", currentUser.getEmail());
+                        Log.d("CURRENT EMAIL: ", Objects.requireNonNull(currentUser.getEmail()));
                         myDialog.hide();
                         myDialog.setContentView(R.layout.confirm_email_message);
                         myDialog.show();
 
                     } else {
-                        Toast.makeText(this, "Couldn't update email", Toast.LENGTH_SHORT);
+                        Toast.makeText(this, "Couldn't update email", Toast.LENGTH_SHORT).show();
 
-                        Log.d("MYLOG", "User email address not updated.");
+                        Log.d("EMAIL DENIED", "User email address not updated.");
                     }
                 });
 
         currentUser.updatePassword(newPasswordText)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        Log.d("MYLOG", "User password updated.");
+                        Log.d("PASSWORD", "PASSWORD UPDATED");
                     } else {
-                        Log.d("MYLOG", "User password not updated");
-                        Toast.makeText(this, "Couldn't update password", Toast.LENGTH_SHORT);
+                        Log.d("PASSWORD FAIL", "PASSWORD NOT UPDATED");
+                        Toast.makeText(this, "Couldn't update password", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -133,13 +124,14 @@ public class SettingsPage extends AppCompatActivity {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = auth.getCurrentUser();
 
-        oldEmail = confirmedEmail.getText().toString();
-        oldPassword = confirmedPassword.getText().toString();
+        String oldEmail = confirmedEmail.getText().toString();
+        String oldPassword = confirmedPassword.getText().toString();
 
-        credential = EmailAuthProvider.getCredential(oldEmail, oldPassword);
+        AuthCredential credential = EmailAuthProvider.getCredential(oldEmail, oldPassword);
+        assert currentUser != null;
         currentUser.reauthenticate(credential).addOnCompleteListener(this, task -> {
             if (task.isSuccessful()) {
-                Log.d("MYLOG", "REAUTHENTICATE WAS SUCCESSFUL");
+                Log.d("RE AUTH", "REAUTHENTICATION SUCCESSFUL");
                 myDialog.setContentView(R.layout.edit_account);
             } else {
                 Toast.makeText(this, "Incorrect User Information", Toast.LENGTH_SHORT).show();
@@ -150,7 +142,7 @@ public class SettingsPage extends AppCompatActivity {
     public void before_confirm_delete(View view) {
         int width = getResources().getDisplayMetrics().widthPixels;
         int height = (int) (getResources().getDisplayMetrics().heightPixels * .4);
-        myDialog.getWindow().setLayout(width, height);
+        Objects.requireNonNull(myDialog.getWindow()).setLayout(width, height);
         myDialog.setContentView(R.layout.confirm_delete_account);
         myDialog.show();
     }

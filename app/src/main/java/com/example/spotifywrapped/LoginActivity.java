@@ -14,8 +14,6 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private EditText userInput;
     private EditText passInput;
-    private Button loginButton;
-    private TextView toSignUp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,8 +22,8 @@ public class LoginActivity extends AppCompatActivity {
 
         userInput = findViewById(R.id.userInput);
         passInput = findViewById(R.id.passInput);
-        loginButton = findViewById(R.id.loginButton);
-        toSignUp = findViewById(R.id.toSignUp);
+        Button loginButton = findViewById(R.id.loginButton);
+        TextView toSignUp = findViewById(R.id.toSignUp);
 
         firebaseAuth = FirebaseAuth.getInstance();
 
@@ -46,8 +44,10 @@ public class LoginActivity extends AppCompatActivity {
         firebaseAuth.signInWithEmailAndPassword(username, password).addOnCompleteListener(this, task -> {
             if (task.isSuccessful()) {
                 Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show();
-                Log.d("Login Successful", "Logged into Firebase");
+                Log.d("LOGIN", "LOGIN SUCCESSFUL");
                 Intent intent = new Intent(this, MainActivity.class);
+                // If account was previously deleted, logging in successfully should tell wrapped fragment
+                WrappedFragment.setAccountDeleted(false);
                 startActivity(intent);
                 //finish();
             } else {
