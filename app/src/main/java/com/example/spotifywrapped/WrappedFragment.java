@@ -96,7 +96,6 @@ public class WrappedFragment extends Fragment {
         trackList = new ArrayList<>();
         artistAdapter = new ArtistAdapter(artistList);
         trackAdapter = new TrackAdapter(trackList);
-        // Automatically sets RV to artists
         initiateRecyclerView(recyclerView);
 
         /*
@@ -171,6 +170,7 @@ public class WrappedFragment extends Fragment {
 
             requireActivity().finish();
         }
+        loadData();
     }
 
     public void getUserProfile() {
@@ -307,6 +307,9 @@ public class WrappedFragment extends Fragment {
                         trackAdapter = new TrackAdapter(trackList);
 
                         mainPageName.setVisibility(View.VISIBLE);
+
+                        mainPageName.setSelection(0);
+                        recyclerView.setAdapter(artistAdapter);
                     } catch (Exception e) {
                         System.out.println(loadCounter);
                         if (loadCounter < 10) {

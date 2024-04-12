@@ -49,6 +49,7 @@ public class SettingsPage extends AppCompatActivity {
         if (currentUser != null) {
             currentUser.delete();
             WrappedFragment.setAccountDeleted(true);
+            PastWrappedFragment.setAccountDeleted(true);
         } else {
             Log.d("DELETE", "USER COULD NOT BE DELETED");
         }

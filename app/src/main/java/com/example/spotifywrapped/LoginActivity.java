@@ -48,6 +48,7 @@ public class LoginActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, MainActivity.class);
                 // If account was previously deleted, logging in successfully should tell wrapped fragment
                 WrappedFragment.setAccountDeleted(false);
+                PastWrappedFragment.setAccountDeleted(false);
                 startActivity(intent);
                 //finish();
             } else {
