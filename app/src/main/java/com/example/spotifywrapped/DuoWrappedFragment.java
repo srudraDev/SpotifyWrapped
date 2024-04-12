@@ -22,29 +22,7 @@ public class DuoWrappedFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.duo_wrapped, container, false);
 
-        present_button = view.findViewById(R.id.present_button);
-        duo_button = view.findViewById(R.id.duo_button);
-        past_button = view.findViewById(R.id.past_button);
-        public_button = view.findViewById(R.id.public_button);
         settings_button = view.findViewById(R.id.settings_button);
-
-        present_button.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), MainActivity.class);
-            startActivity(intent);
-        });
-        duo_button.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), DuoWrappedActivity.class);
-            startActivity(intent);
-        });
-        past_button.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), PastWrappedActivity.class);
-            startActivity(intent);
-        });
-
-        public_button.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), PublicWrappedActivity.class);
-            startActivity(intent);
-        });
 
         settings_button.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), SettingsPage.class);
