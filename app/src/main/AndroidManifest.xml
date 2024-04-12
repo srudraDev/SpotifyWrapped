@@ -68,7 +68,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".DuoWrappedActivity"
+            android:name=".LLMFragment"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.ASSIST" />

@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity
     WrappedFragment firstFragment = new WrappedFragment();
     PastWrappedFragment secondFragment = new PastWrappedFragment();
     DuoWrappedFragment thirdFragment = new DuoWrappedFragment();
+    LLMFragment fourthFragment = new LLMFragment();
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -51,6 +52,12 @@ public class MainActivity extends AppCompatActivity
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.flFragment, thirdFragment)
+                    .commit();
+            return true;
+        } else if (item.getItemId() == R.id.LLM) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.flFragment, fourthFragment)
                     .commit();
             return true;
         }

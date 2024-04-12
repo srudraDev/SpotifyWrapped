@@ -17,9 +17,4 @@
         android:name="com.example.spotifywrapped.MainActivity"
         android:label="activity_main"
         tools:layout="@layout/activity_main" />
-    <activity
-        android:id="@+id/wrappedMainActivity"
-        android:name="com.example.spotifywrapped.WrappedMainActivity"
-        android:label="wrapped_main"
-        tools:layout="@layout/wrapped_main" />
 </navigation>

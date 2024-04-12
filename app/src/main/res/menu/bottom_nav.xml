@@ -12,4 +12,8 @@
         android:id="@+id/duo"
         android:title="Duo"
         android:icon="@drawable/ic_action_people"/>
+    <item
+        android:id="@+id/LLM"
+        android:title="AI"
+        android:icon="@drawable/baseline_assistant_24" />
 </menu>
