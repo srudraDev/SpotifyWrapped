@@ -66,23 +66,41 @@ public class DuoWrappedActivity extends AppCompatActivity {
     private static boolean isAccountDeleted = false;
 
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("MYLOG", "in duowrapped on create");
         super.onCreate(savedInstanceState);
+
+        Log.d("MYLOG", "past super.OnCreate");
+
+
         setContentView(R.layout.duo_wrapped);
+        Log.d("MYLOG", "set the content view");
 
         // Initialize FireStore
         db = FirebaseFirestore.getInstance();
+        Log.d("MYLOG", "db made");
 
         // RecyclerView
         artistList = new ArrayList<>();
+        Log.d("MYLOG", "artist list made");
+
         trackList = new ArrayList<>();
+        Log.d("MYLOG", "track list made");
+
         artistAdapter = new ArtistAdapter(artistList);
+        Log.d("MYLOG", "artist adapter made");
+
         initiateRecyclerView(recyclerView);
+        Log.d("MYLOG", "initiated recycler view");
 
         // Initialize fireModel
         fireModel = new ViewModelProvider(this).get(FireModel.class);
+        Log.d("MYLOG", "fire model made");
+
         getUserProfile();
+        Log.d("MYLOG", "got user profile");
 
         spinner = findViewById(R.id.time_frame_spinner);
+        Log.d("MYLOG", "spinner made");
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -141,11 +159,16 @@ public class DuoWrappedActivity extends AppCompatActivity {
             Intent intent = new Intent(this, SettingsPage.class);
             startActivity(intent);
         });
+        Log.d("MYLOG", "past the buttons being made");
     }
 
     @Override
     protected void onResume() {
+        Log.d("MYLOG", "before the super onResume");
+
         super.onResume();
+        Log.d("MYLOG", "past the super on resume");
+
         // Check if user has been deleted
         if (isAccountDeleted) {
             Log.d("ACCOUNT", "Account read as DELETED");
@@ -153,6 +176,8 @@ public class DuoWrappedActivity extends AppCompatActivity {
             isAccountDeleted = false;
             finish();
         }
+        Log.d("MYLOG", "past the account being deleted");
+
         // Check if data is already loaded in the FireModel
         fireModel = new ViewModelProvider(this).get(FireModel.class);
         if (!fireModel.getNeedReload()) {
@@ -163,19 +188,28 @@ public class DuoWrappedActivity extends AppCompatActivity {
 
     public void getUserProfile() {
         fireModel.setNeedReload(false);
+        Log.d("MYLOG", "set fire model reload");
+
 
         if (mAccessToken == null) {
             Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
             return;
         }
+        Log.d("MYLOG", "m access token null checked");
 
         // Create a request to get the user profile
         final Request request = new Request.Builder()
                 .url("https://api.spotify.com/v1/me")
                 .addHeader("Authorization", "Bearer " + mAccessToken)
                 .build();
+        Log.d("MYLOG", "made request");
+
         cancelCall();
+        Log.d("MYLOG", "cancel call");
+
         mCall = mOkHttpClient.newCall(request);
+        Log.d("MYLOG", "mCall made, newCall(request)");
+
 
         mCall.enqueue(new Callback() {
             @Override
