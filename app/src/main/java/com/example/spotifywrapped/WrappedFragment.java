@@ -274,53 +274,59 @@ public class WrappedFragment extends Fragment {
     }
 
     public void loadData() {
-        // Get Current User id from FireBase
-        firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        assert currentUser != null;
-        String userID = currentUser.getUid(); // Will never be null (must have account to log in)
+        try {
+            // Get Current User id from FireBase
+            firebaseAuth = FirebaseAuth.getInstance();
+            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+            assert currentUser != null;
+            String userID = currentUser.getUid(); // Will never be null (must have account to log in)
 
-        String documentPath = "users/" + userID;
-        DocumentReference docRef = db.document(documentPath);
+            String documentPath = "users/" + userID;
+            DocumentReference docRef = db.document(documentPath);
 
-        // FILL DATA FROM FIREBASE
-        docRef.get().addOnSuccessListener(documentSnapshot -> {
-            if (documentSnapshot.exists()) {
-                Log.d("TEST", "DOCREF SUCCESSFUL");
-                // Document exists, extract the data
-                // Assuming the structure of your document is similar to how you parsed the Spotify API response
-                try {
-                    // Get artist and track arrays from firebase
-                    List<Map<String, Object>> Artists10 = (List<Map<String, Object>>) documentSnapshot.get("Artists10");
-                    List<Map<String, Object>> Tracks10 = (List<Map<String, Object>>) documentSnapshot.get("Tracks10");
+            // FILL DATA FROM FIREBASE
+            docRef.get().addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    Log.d("TEST", "DOCREF SUCCESSFUL");
+                    // Document exists, extract the data
+                    // Assuming the structure of your document is similar to how you parsed the Spotify API response
+                    try {
+                        // Get artist and track arrays from firebase
+                        List<Map<String, Object>> Artists10 = (List<Map<String, Object>>) documentSnapshot.get("Artists10");
+                        List<Map<String, Object>> Tracks10 = (List<Map<String, Object>>) documentSnapshot.get("Tracks10");
 
-                    // Set each item in both lists from firebase
-                    assert Artists10 != null;
-                    artistList = setArtists(Artists10);
-                    assert Tracks10 != null;
-                    trackList = setTracks(Tracks10);
+                        // Set each item in both lists from firebase
+                        artistList = setArtists(Artists10);
+                        trackList = setTracks(Tracks10);
 
-                    artistAdapter = new ArtistAdapter(artistList);
-                    trackAdapter = new TrackAdapter(trackList);
+                        if (artistList == null|| trackList == null) {
+                            throw new java.lang.IllegalArgumentException("artistList or trackList is null");
+                        }
 
-                    mainPageName.setVisibility(View.VISIBLE);
-                } catch (Exception e) {
-                    System.out.println(loadCounter);
-                    if (loadCounter < 10) {
-                        getUserProfile();
-                        loadCounter++;
-                    } else {
-                        Log.d("LOAD ERROR", "ATTEMPTED TO LOAD MORE THAN 10 TIMES");
+                        artistAdapter = new ArtistAdapter(artistList);
+                        trackAdapter = new TrackAdapter(trackList);
+
+                        mainPageName.setVisibility(View.VISIBLE);
+                    } catch (Exception e) {
+                        System.out.println(loadCounter);
+                        if (loadCounter < 10) {
+                            getUserProfile();
+                            loadCounter++;
+                        } else {
+                            Log.d("LOAD ERROR", "ATTEMPTED TO LOAD MORE THAN 10 TIMES");
+                        }
                     }
+                } else {
+                    // Document does not exist
+                    Log.d(TAG, "DOCREF UNSUCCESSFUL");
                 }
-            } else {
-                // Document does not exist
-                Log.d(TAG, "DOCREF UNSUCCESSFUL");
-            }
-        }).addOnFailureListener(e -> {
-            // Error getting document
-            Log.w(TAG, "Error getting document", e);
-        });
+            }).addOnFailureListener(e -> {
+                // Error getting document
+                Log.w(TAG, "Error getting document", e);
+            });
+        } catch (Exception e) {
+            Log.d("LOAD", "MAJOR LOAD ERROR: " + e);
+        }
     }
 
     public void initiateRecyclerView(RecyclerView rv) {
