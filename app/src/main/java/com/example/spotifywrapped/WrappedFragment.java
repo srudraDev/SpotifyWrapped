@@ -60,7 +60,6 @@ public class WrappedFragment extends Fragment {
     private RecyclerView recyclerView;
     private Button linkSpotifyBtn;
     private Spinner mainPageName;
-    private FireModel fireModel;
     // Adapters
     private ArtistAdapter artistAdapter;
     private TrackAdapter trackAdapter;
@@ -99,9 +98,6 @@ public class WrappedFragment extends Fragment {
         trackAdapter = new TrackAdapter(trackList);
         // Automatically sets RV to artists
         initiateRecyclerView(recyclerView);
-
-        // Initialize FireView
-        fireModel = new ViewModelProvider(this).get(FireModel.class);
 
         // Do everything lol
         loadData();
@@ -257,7 +253,7 @@ public class WrappedFragment extends Fragment {
                             .addOnFailureListener(e ->
                                     Log.w(TAG, "Error updating user data", e)
                             );
-                    // Load new Firebase data into FireModel
+                    // Load new Firebase data
                     loadData();
                 } catch (JSONException e) {
                     Log.d("JSON", "Failed to parse data: " + e);
@@ -275,7 +271,7 @@ public class WrappedFragment extends Fragment {
         String documentPath = "users/" + userID;
         DocumentReference docRef = db.document(documentPath);
 
-        // FILL FIREMODEL FROM FIREBASE
+        // FILL DATA FROM FIREBASE
         Log.d("TEST", "ATTEMPTING DOCREF");
         docRef.get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
@@ -283,18 +279,16 @@ public class WrappedFragment extends Fragment {
                 // Document exists, extract the data
                 // Assuming the structure of your document is similar to how you parsed the Spotify API response
                 try {
-                    // Get artist and track arrays
+                    // Get artist and track arrays from firebase
                     List<Map<String, Object>> Artists10 = (List<Map<String, Object>>) documentSnapshot.get("Artists10");
                     List<Map<String, Object>> Tracks10 = (List<Map<String, Object>>) documentSnapshot.get("Tracks10");
 
-                    // Set each thing in fireModel to what's in firebase
+                    // Set each item in both lists from firebase
                     artistList = setArtists(Artists10);
                     trackList = setTracks(Tracks10);
 
                     artistAdapter = new ArtistAdapter(artistList);
                     trackAdapter = new TrackAdapter(trackList);
-
-                    System.out.println("ARTISTLIST: " + artistList);
 
                     linkSpotifyBtn.setVisibility(View.INVISIBLE);
                     mainPageName.setVisibility(View.VISIBLE);

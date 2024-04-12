@@ -47,45 +47,12 @@
         android:layout_marginStart="4dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="4dp"
-        android:layout_marginBottom="4dp"
-        app:layout_constraintBottom_toTopOf="@+id/duo_button"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/time_frame_spinner"
         app:layout_constraintVertical_bias="0.0" />
 
-
-    <Button
-        android:id="@+id/present_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Present"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/duo_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Duo"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/present_button" />
-
-    <Button
-        android:id="@+id/past_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Past"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/public_button" />
-
-    <Button
-        android:id="@+id/public_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Public"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
