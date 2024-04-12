@@ -66,7 +66,8 @@ public class WrappedFragment extends Fragment {
     // User lists
     private List<top10Artists> artistList;
     private List<top10Tracks> trackList;
-    // Boolean helpers
+    // counters
+    private int loadCounter = 0;
     private static boolean isAccountDeleted = false;
 
     public WrappedFragment() {
@@ -99,9 +100,15 @@ public class WrappedFragment extends Fragment {
         // Automatically sets RV to artists
         initiateRecyclerView(recyclerView);
 
-        // Do everything lol
+        /*
+          Get data from FireBase and attempt to load profile. Will call GetUserProfile if
+          data is not fully available in FireBase
+          Also loads data for the other pages. Since this page pops up first, it will prime
+          the others for usage
+        */
         loadData();
 
+        // The DropDown menu for selecting Artists or Tracks
         mainPageName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -123,6 +130,7 @@ public class WrappedFragment extends Fragment {
             }
         });
 
+        // Send the user to spotify login screen if they do not have an account (launched by linkSpotifyBtn)
         spotifyAuthLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
@@ -136,8 +144,9 @@ public class WrappedFragment extends Fragment {
                             getUserProfile();
                         }
                     }
-                });
+        });
 
+        // Gets the token for the user and primes the spotifyAuthLauncher
         linkSpotifyBtn.setOnClickListener(v -> {
             // Call getToken() to link Spotify
             Log.d("TOKEN", "GET TOKEN");
@@ -290,11 +299,15 @@ public class WrappedFragment extends Fragment {
                     artistAdapter = new ArtistAdapter(artistList);
                     trackAdapter = new TrackAdapter(trackList);
 
-                    linkSpotifyBtn.setVisibility(View.INVISIBLE);
                     mainPageName.setVisibility(View.VISIBLE);
                 } catch (Exception e) {
-                    System.out.println("E: " + e);
-                    getUserProfile();
+                    System.out.println(loadCounter);
+                    if (loadCounter < 10) {
+                        getUserProfile();
+                        loadCounter++;
+                    } else {
+                        Log.d("FATAL_ERROR", "ATTEMPTED TO LOAD MORE THAN 10 TIMES");
+                    }
                 }
             } else {
                 // Document does not exist
