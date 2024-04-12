@@ -18,3 +18,5 @@ local.properties
 .idea/gradle.xml
 .idea/misc.xml
 .idea/gradle.xml
+app/src/main/java/com/example/spotifywrapped/secret.java
+
