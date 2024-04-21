@@ -108,6 +108,7 @@ public class LLMFragment extends Fragment {
                 } else {
                     Log.e("OPENAI", "Request failed: " + response.code());
                     // Handle unsuccessful response
+                    aiResponse.setText("Could not load summary");
                 }
             }
         });
