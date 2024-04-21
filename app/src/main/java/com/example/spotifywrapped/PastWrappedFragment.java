@@ -135,6 +135,7 @@ public class PastWrappedFragment extends Fragment {
                     case 0:
                         if (mediaPlayer != null) {
                             mediaPlayer.release();
+                            mediaPlayer = null;
                         }
                         // Load data for top 10 artists Medium
                         recyclerView.setAdapter(artistAdapterMedium);
@@ -171,6 +172,7 @@ public class PastWrappedFragment extends Fragment {
                     case 2:
                         if (mediaPlayer != null) {
                             mediaPlayer.release();
+                            mediaPlayer = null;
                         }
                         // Load data for top 10 artists Long
                         recyclerView.setAdapter(artistAdapterLong);
@@ -245,6 +247,7 @@ public class PastWrappedFragment extends Fragment {
         super.onPause();
         if (mediaPlayer != null) {
             mediaPlayer.release();
+            mediaPlayer = null;
         }
     }
 

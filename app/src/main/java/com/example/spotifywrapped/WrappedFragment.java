@@ -128,6 +128,7 @@ public class WrappedFragment extends Fragment {
                     case 0:
                         if (mediaPlayer != null) {
                             mediaPlayer.release();
+                            mediaPlayer = null;
                         }
                         // Load data for top 10 artists
                         recyclerView.setAdapter(artistAdapter);
@@ -203,6 +204,7 @@ public class WrappedFragment extends Fragment {
         super.onPause();
         if (mediaPlayer != null) {
             mediaPlayer.release();
+            mediaPlayer = null;
         }
     }
 
