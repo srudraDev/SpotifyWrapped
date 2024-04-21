@@ -34,7 +34,7 @@
 
         <EditText
             android:id="@+id/edit_account_email"
-            android:layout_width="wrap_content"
+            android:layout_width="275dp"
             android:layout_height="wrap_content" />
 
         <TextView
@@ -43,18 +43,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Account Password:"/>
+
         <EditText
             android:id="@+id/edit_account_password"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_width="275dp"
+            android:layout_height="wrap_content" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Confirm Changes"
             android:layout_gravity="center"
-            android:backgroundTint="@color/lightGray"
-            android:textColor="@color/black"
+            android:backgroundTint="@color/mainGreen"
+            android:textColor="@color/white"
             android:onClick="successful_account_edit"
             />
 

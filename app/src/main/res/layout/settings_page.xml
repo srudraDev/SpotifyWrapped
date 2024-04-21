@@ -5,38 +5,43 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".SettingsPage"
+    android:background="@color/backGreen2"
     android:id="@+id/linear"
     >
-
+    <Button
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:backgroundTint="@color/mainGreen"
+        android:layout_marginTop="4dp"
+        android:layout_marginStart="4dp"
+        android:drawableTop="@drawable/arrow_back_24"
+        android:onClick="return_from_settings" />
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:id="@+id/delete_btn"
         android:text="Delete Your Account"
-        android:onClick="before_confirm_delete"
-        />
+        android:layout_marginBottom="5dp"
+        android:drawableEnd="@drawable/delete_24"
+        android:backgroundTint="@color/mainGreen"
+        android:onClick="before_confirm_delete" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:id="@+id/edit_btn"
+        android:backgroundTint="@color/mainGreen"
         android:text="Edit Account Information"
+        android:drawableEnd="@drawable/edit_24"
+
         android:onClick="edit_account_button"/>
 
     <View
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Return to Page"
-        android:onClick="return_from_settings"
-        />
 
 
 </LinearLayout>

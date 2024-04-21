@@ -36,7 +36,7 @@
 
     <EditText
         android:id="@+id/confirm_email"
-        android:layout_width="wrap_content"
+        android:layout_width="275dp"
         android:layout_height="wrap_content" />
 
     <TextView
@@ -47,7 +47,7 @@
         android:text="Account Password:"/>
     <EditText
         android:id="@+id/confirm_password"
-        android:layout_width="wrap_content"
+        android:layout_width="275dp"
         android:layout_height="wrap_content"/>
 
     <Button
@@ -55,8 +55,8 @@
         android:layout_height="wrap_content"
         android:text="Confirm Information"
         android:layout_gravity="center"
-        android:backgroundTint="@color/lightGray"
-        android:textColor="@color/black"
+        android:backgroundTint="@color/mainGreen"
+        android:textColor="@color/white"
         android:onClick="confirm_information_press"
         />
 

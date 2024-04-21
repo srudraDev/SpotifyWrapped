@@ -76,15 +76,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".PublicWrappedActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.ASSIST" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
 
         <activity android:name=".SettingsPage"
             android:exported="true"

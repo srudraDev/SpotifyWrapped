@@ -35,10 +35,11 @@ public class SettingsPage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_page);
-        Button delete_button = findViewById(R.id.delete_btn);
-        Button edit_button = findViewById(R.id.edit_btn);
 
+        int width = getResources().getDisplayMetrics().widthPixels;
+        int height = (int) (getResources().getDisplayMetrics().heightPixels * .5);
         myDialog = new Dialog(this);
+        Objects.requireNonNull(myDialog.getWindow()).setLayout(width, height);
         myDialog.setContentView(R.layout.edit_account);
     }
 
