@@ -8,7 +8,6 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import java.io.*;
 
 public class MainActivity extends AppCompatActivity
         implements BottomNavigationView
@@ -27,28 +26,28 @@ public class MainActivity extends AppCompatActivity
                 
         bottomNavigationView
                 .setOnNavigationItemSelectedListener(this);
-        bottomNavigationView.setSelectedItemId(R.id.wrapped);
+        bottomNavigationView.setSelectedItemId(R.id.home);
     }
-    WrappedFragment firstFragment = new WrappedFragment();
-    PastWrappedFragment secondFragment = new PastWrappedFragment();
-    DuoWrappedFragment thirdFragment = new DuoWrappedFragment();
+    HomeFragment firstFragment = new HomeFragment();
+    WrappedFragment secondFragment = new WrappedFragment();
+    PastWrappedFragment thirdFragment = new PastWrappedFragment();
     LLMFragment fourthFragment = new LLMFragment();
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.wrapped) {
+        if (item.getItemId() == R.id.home) {
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.flFragment, firstFragment)
                     .commit();
             return true;
-        } else if (item.getItemId() == R.id.past) {
+        } else if (item.getItemId() == R.id.wrapped) {
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.flFragment, secondFragment)
                     .commit();
             return true;
-        } else if (item.getItemId() == R.id.duo) {
+        } else if (item.getItemId() == R.id.past) {
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.flFragment, thirdFragment)

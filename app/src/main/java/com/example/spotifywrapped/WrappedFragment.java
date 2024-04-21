@@ -7,6 +7,7 @@ import static com.example.spotifywrapped.pullSpotifyDataToDatabase.mCall;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -22,8 +23,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,10 +39,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -68,6 +73,9 @@ public class WrappedFragment extends Fragment {
     // counters
     private int loadCounter = 0;
     private static boolean isAccountDeleted = false;
+    // song stuff
+    private MediaPlayer mediaPlayer;
+    private top10Tracks currentlyPlayingTrack;
 
     public WrappedFragment() {
         // Required empty public constructor
@@ -85,9 +93,14 @@ public class WrappedFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_wrapped, container, false);
 
-        // Initialize views and variables
+        // Initialize Refresh Button
         Button linkSpotifyBtn = view.findViewById(R.id.link_spotify_btn);
+
+        // Initialize Spinner
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.spinner_item, getResources().getStringArray(R.array.typeOfWrapped));
         mainPageName = view.findViewById(R.id.typeOfWrapped);
+        mainPageName.setAdapter(adapter);
+
         recyclerView = view.findViewById(R.id.recycler_view_top_artists);
         //past_button = view.findViewById(R.id.past_button);
 
@@ -96,6 +109,7 @@ public class WrappedFragment extends Fragment {
         trackList = new ArrayList<>();
         artistAdapter = new ArtistAdapter(artistList);
         trackAdapter = new TrackAdapter(trackList);
+
         initiateRecyclerView(recyclerView);
 
         /*
@@ -113,12 +127,41 @@ public class WrappedFragment extends Fragment {
                 // Handle item selection
                 switch (position) {
                     case 0:
+                        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                            mediaPlayer.stop();
+                        }
                         // Load data for top 10 artists
                         recyclerView.setAdapter(artistAdapter);
                         break;
                     case 1:
                         // Load data for top 10 tracks
+                        mediaPlayer = new MediaPlayer();
                         recyclerView.setAdapter(trackAdapter);
+
+                        trackAdapter.setOnItemClickListener(positionV -> {
+                            // Handle item click
+                            top10Tracks clickedTrack = trackList.get(positionV);
+                            Log.d("SONG", "SONG: " + clickedTrack);
+
+                            // Check if the clicked track has a preview URL
+                            if (clickedTrack != null && clickedTrack.getPreviewUrl() != null) {
+                                if (mediaPlayer.isPlaying() && clickedTrack.equals(currentlyPlayingTrack)) {
+                                    // If a preview URL exists, play the song clip
+                                    mediaPlayer.stop();
+                                } else {
+                                    mediaPlayer.stop();
+                                    mediaPlayer = new MediaPlayer();
+                                    playSongClip(clickedTrack.getPreviewUrl(), mediaPlayer);
+                                    currentlyPlayingTrack = clickedTrack;
+                                }
+                            } else {
+                                // Handle case where preview URL is not available
+                                Toast.makeText(requireContext(), "Preview not available", Toast.LENGTH_SHORT).show();
+                                assert clickedTrack != null;
+                                Log.d("SONG", "URL: " + clickedTrack.getPreviewUrl());
+                            }
+                        });
+
                         break;
                 }
             }
@@ -156,20 +199,16 @@ public class WrappedFragment extends Fragment {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-
-        // Check if user has been deleted
-        if (isAccountDeleted) {
-
-            isAccountDeleted = false;
-
-            // Send user to Login Screen if account was deleted
-            Intent intent = new Intent(requireActivity(), LoginActivity.class);
-            startActivity(intent);
-
-            requireActivity().finish();
-        }
         loadData();
     }
 
@@ -231,13 +270,13 @@ public class WrappedFragment extends Fragment {
                     List<top10Artists> parsedLongArtistData = longArtistFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
 
                     // Set User Tracks data
-                    top10Tracks.TrackFetcher shortTrackFetcher = new top10Tracks.TrackFetcher("short_term");
+                    top10Tracks.TrackFetcher shortTrackFetcher = new top10Tracks.TrackFetcher("short_term", mAccessToken, mOkHttpClient);
                     List<top10Tracks> parsedShortTracksData = shortTrackFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
 
-                    top10Tracks.TrackFetcher mediumTrackFetcher = new top10Tracks.TrackFetcher("medium_term");
+                    top10Tracks.TrackFetcher mediumTrackFetcher = new top10Tracks.TrackFetcher("medium_term", mAccessToken, mOkHttpClient);
                     List<top10Tracks> parsedMediumTracksData = mediumTrackFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
 
-                    top10Tracks.TrackFetcher longTrackFetcher = new top10Tracks.TrackFetcher("long_term");
+                    top10Tracks.TrackFetcher longTrackFetcher = new top10Tracks.TrackFetcher("long_term", mAccessToken, mOkHttpClient);
                     List<top10Tracks> parsedLongTracksData = longTrackFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
 
                     // Put all the user data in a HashMap
@@ -357,20 +396,36 @@ public class WrappedFragment extends Fragment {
             String artistName = (String) trackData.get("artistName");
             String albumName = (String) trackData.get("albumName");
             String imageUrl = (String) trackData.get("secondImageUrl");
+            String previewUrl = (String) trackData.get("previewUrl");
 
-            top10Tracks newTrack = new top10Tracks(name, artistName, albumName, imageUrl);
+            top10Tracks newTrack = new top10Tracks(name, artistName, albumName, imageUrl, previewUrl);
             newTrackList.add(newTrack);
         }
         return newTrackList;
+    }
+
+    private void playSongClip(String previewUrl, MediaPlayer mediaPlayer) {
+        try {
+            mediaPlayer.setDataSource(previewUrl);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (IOException e) {
+            Toast.makeText(requireContext(), "Preview not available", Toast.LENGTH_SHORT).show();
+            Log.d("SONG", "SONG FAILED TO PLAY");
+        }
+
+        // Optionally, you may want to release the MediaPlayer after the clip finishes playing
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mediaPlayer.release();
+            }
+        });
     }
 
     @Override
     public void onDestroy() {
         cancelCall();
         super.onDestroy();
-    }
-
-    public static void setAccountDeleted(boolean input) {
-        isAccountDeleted = input;
     }
 }

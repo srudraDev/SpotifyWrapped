@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="time_frames">
-        <item>Artists: 6 Months</item>
-        <item>Tracks: 6 Months</item>
-        <item>Artists: All Time</item>
-        <item>Tracks: All Time</item>
+        <item> Artists: 6 Months </item>
+        <item> Tracks: 6 Months </item>
+        <item> Artists: All Time </item>
+        <item> Tracks: All Time </item>
     </string-array>
 </resources>

@@ -2,6 +2,7 @@ package com.example.spotifywrapped;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -48,8 +49,8 @@ public class SettingsPage extends AppCompatActivity {
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser != null) {
             currentUser.delete();
-            WrappedFragment.setAccountDeleted(true);
-            PastWrappedFragment.setAccountDeleted(true);
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
         } else {
             Log.d("DELETE", "USER COULD NOT BE DELETED");
         }
@@ -57,6 +58,9 @@ public class SettingsPage extends AppCompatActivity {
     }
 
     public void edit_account_button(View view) {
+        int width = getResources().getDisplayMetrics().widthPixels;
+        int height = (int) (getResources().getDisplayMetrics().heightPixels * .5);
+        Objects.requireNonNull(myDialog.getWindow()).setLayout(width, height);
         myDialog.setContentView(R.layout.resign_in_page);
         confirmedEmail = myDialog.findViewById(R.id.confirm_email);
         confirmedPassword = myDialog.findViewById(R.id.confirm_password);

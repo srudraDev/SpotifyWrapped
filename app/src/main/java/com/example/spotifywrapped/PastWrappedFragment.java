@@ -7,6 +7,7 @@ import static com.example.spotifywrapped.pullSpotifyDataToDatabase.mCall;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -22,8 +23,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -73,6 +76,9 @@ public class PastWrappedFragment extends Fragment {
     private int loadCounter = 0;
     // booleans
     private static boolean isAccountDeleted = false;
+    // song stuff
+    private MediaPlayer mediaPlayer;
+    private top10Tracks currentlyPlayingTrack;
 
     public PastWrappedFragment() {
         // Required empty public constructor
@@ -93,6 +99,8 @@ public class PastWrappedFragment extends Fragment {
         // Initialize views and variables
         Button linkSpotifyBtn = view.findViewById(R.id.refresh_btn);
         typeSpinner = view.findViewById(R.id.time_frame_spinner);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.spinner_item, getResources().getStringArray(R.array.time_frames));
+        typeSpinner.setAdapter(adapter);
         recyclerView = view.findViewById(R.id.top_artists_recycler_view);
         //past_button = view.findViewById(R.id.past_button);
 
@@ -125,20 +133,80 @@ public class PastWrappedFragment extends Fragment {
                 Log.d("RECYCLER", "ATTEMPTING FILL");
                 switch (position) {
                     case 0:
+                        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                            mediaPlayer.stop();
+                        }
                         // Load data for top 10 artists Medium
                         recyclerView.setAdapter(artistAdapterMedium);
                         break;
                     case 1:
+                        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                            mediaPlayer.stop();
+                        }
+                        mediaPlayer = new MediaPlayer();
                         // Load data for top 10 tracks Medium
                         recyclerView.setAdapter(trackAdapterMedium);
+                        trackAdapterMedium.setOnItemClickListener(positionV -> {
+                            // Handle item click
+                            top10Tracks clickedTrack = trackListMedium.get(positionV);
+
+                            // Check if the clicked track has a preview URL
+                            if (clickedTrack.getPreviewUrl() != null) {
+                                Log.d("TEST", "Song: " + clickedTrack + " Url: " + clickedTrack.getPreviewUrl());
+                                if (mediaPlayer.isPlaying() && clickedTrack.equals(currentlyPlayingTrack)) {
+                                    // If a preview URL exists, play the song clip
+                                    mediaPlayer.stop();
+                                } else {
+                                    mediaPlayer.stop();
+                                    mediaPlayer = new MediaPlayer();
+                                    playSongClip(clickedTrack.getPreviewUrl(), mediaPlayer);
+                                    currentlyPlayingTrack = clickedTrack;
+                                }
+                            } else {
+                                // Handle case where preview URL is not available
+                                Toast.makeText(requireContext(), "Preview not available", Toast.LENGTH_SHORT).show();
+                                assert clickedTrack != null;
+                                Log.d("SONG", "URL: " + clickedTrack.getPreviewUrl());
+                            }
+                        });
                         break;
                     case 2:
+                        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                            mediaPlayer.stop();
+                        }
                         // Load data for top 10 artists Long
                         recyclerView.setAdapter(artistAdapterLong);
                         break;
                     case 3:
+                        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                            mediaPlayer.stop();
+                        }
+                        mediaPlayer = new MediaPlayer();
                         // Load data for top 10 tracks Long
                         recyclerView.setAdapter(trackAdapterLong);
+                        trackAdapterLong.setOnItemClickListener(positionV -> {
+                            // Handle item click
+                            top10Tracks clickedTrack = trackListLong.get(positionV);
+
+                            // Check if the clicked track has a preview URL
+                            if (clickedTrack.getPreviewUrl() != null) {
+                                Log.d("TEST", "Song: " + clickedTrack + " Url: " + clickedTrack.getPreviewUrl());
+                                if (mediaPlayer.isPlaying() && clickedTrack.equals(currentlyPlayingTrack)) {
+                                    // If a preview URL exists, play the song clip
+                                    mediaPlayer.stop();
+                                } else {
+                                    mediaPlayer.stop();
+                                    mediaPlayer = new MediaPlayer();
+                                    playSongClip(clickedTrack.getPreviewUrl(), mediaPlayer);
+                                    currentlyPlayingTrack = clickedTrack;
+                                }
+                            } else {
+                                // Handle case where preview URL is not available
+                                Toast.makeText(requireContext(), "Preview not available", Toast.LENGTH_SHORT).show();
+                                assert clickedTrack != null;
+                                Log.d("SONG", "URL: " + clickedTrack.getPreviewUrl());
+                            }
+                        });
                         break;
                 }
             }
@@ -176,20 +244,16 @@ public class PastWrappedFragment extends Fragment {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-
-        // Check if user has been deleted
-        if (isAccountDeleted) {
-
-            isAccountDeleted = false;
-
-            // Send user to Login Screen if account was deleted
-            Intent intent = new Intent(requireActivity(), LoginActivity.class);
-            startActivity(intent);
-
-            requireActivity().finish();
-        }
         initiateRecyclerView(recyclerView);
         loadData();
     }
@@ -252,13 +316,13 @@ public class PastWrappedFragment extends Fragment {
                     List<top10Artists> parsedLongArtistData = longArtistFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
 
                     // Set User Tracks data
-                    top10Tracks.TrackFetcher shortTrackFetcher = new top10Tracks.TrackFetcher("short_term");
+                    top10Tracks.TrackFetcher shortTrackFetcher = new top10Tracks.TrackFetcher("short_term", mAccessToken, mOkHttpClient);
                     List<top10Tracks> parsedShortTracksData = shortTrackFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
 
-                    top10Tracks.TrackFetcher mediumTrackFetcher = new top10Tracks.TrackFetcher("medium_term");
+                    top10Tracks.TrackFetcher mediumTrackFetcher = new top10Tracks.TrackFetcher("medium_term", mAccessToken, mOkHttpClient);
                     List<top10Tracks> parsedMediumTracksData = mediumTrackFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
 
-                    top10Tracks.TrackFetcher longTrackFetcher = new top10Tracks.TrackFetcher("long_term");
+                    top10Tracks.TrackFetcher longTrackFetcher = new top10Tracks.TrackFetcher("long_term", mAccessToken, mOkHttpClient);
                     List<top10Tracks> parsedLongTracksData = longTrackFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
 
                     // Put all the user data in a HashMap
@@ -384,20 +448,36 @@ public class PastWrappedFragment extends Fragment {
             String artistName = (String) trackData.get("artistName");
             String albumName = (String) trackData.get("albumName");
             String imageUrl = (String) trackData.get("secondImageUrl");
+            String previewUrl = (String) trackData.get("previewUrl");
 
-            top10Tracks newTrack = new top10Tracks(name, artistName, albumName, imageUrl);
+            top10Tracks newTrack = new top10Tracks(name, artistName, albumName, imageUrl, previewUrl);
             newTrackList.add(newTrack);
         }
         return newTrackList;
+    }
+
+    private void playSongClip(String previewUrl, MediaPlayer mediaPlayer) {
+        try {
+            mediaPlayer.setDataSource(previewUrl);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (IOException e) {
+            Toast.makeText(requireContext(), "Preview not available", Toast.LENGTH_SHORT).show();
+            Log.d("SONG", "SONG FAILED TO PLAY");
+        }
+
+        // Optionally, you may want to release the MediaPlayer after the clip finishes playing
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mediaPlayer.release();
+            }
+        });
     }
 
     @Override
     public void onDestroy() {
         cancelCall();
         super.onDestroy();
-    }
-
-    public static void setAccountDeleted(boolean input) {
-        isAccountDeleted = input;
     }
 }

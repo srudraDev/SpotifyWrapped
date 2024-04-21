@@ -1,5 +1,6 @@
 package com.example.spotifywrapped;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +17,19 @@ import java.util.List;
 public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHolder> {
 
     private final List<top10Tracks> trackList;
+    private OnItemClickListener listener;
+
+    public interface OnItemClickListener {
+        void onItemClick(int position);
+    }
 
     public TrackAdapter(List<top10Tracks> trackList) {
         this.trackList = trackList;
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        Log.d("SONG", "SET LISTENER");
+        this.listener = listener;
     }
 
     static class TrackViewHolder extends RecyclerView.ViewHolder {
@@ -52,6 +63,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
 
     @Override
     public void onBindViewHolder(@NonNull TrackViewHolder holder, int position) {
+        Log.d("SONG", "BIND HOLDER CALLED: " + position);
         String trackName = trackList.get(position).getName();
         String artistName = trackList.get(position).getArtistName();
         String albumName = trackList.get(position).getAlbumName();
@@ -59,6 +71,13 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
                 .load(trackList.get(position).getSecondImageUrl())
                 .into(holder.trackImageView);
         holder.bind(trackName, artistName, albumName, position + 1);
+
+        // Set onclick listener
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(position);
+            }
+        });
     }
 
     @Override

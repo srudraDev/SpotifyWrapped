@@ -59,7 +59,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".DuoWrappedFragment"
+            android:name=".HomeFragment"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.ASSIST" />
