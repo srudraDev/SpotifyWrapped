@@ -86,6 +86,7 @@
         android:layout_marginTop="35dp"
         android:layout_marginEnd="31dp"
         android:layout_marginBottom="223dp"
+        android:backgroundTint="@color/mainGreen"
         android:text="Login"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

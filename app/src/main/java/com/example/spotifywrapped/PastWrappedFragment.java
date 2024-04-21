@@ -74,8 +74,6 @@ public class PastWrappedFragment extends Fragment {
     private List<top10Tracks> trackListLong;
     // counters
     private int loadCounter = 0;
-    // booleans
-    private static boolean isAccountDeleted = false;
     // song stuff
     private MediaPlayer mediaPlayer;
     private top10Tracks currentlyPlayingTrack;
@@ -102,7 +100,6 @@ public class PastWrappedFragment extends Fragment {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.spinner_item, getResources().getStringArray(R.array.time_frames));
         typeSpinner.setAdapter(adapter);
         recyclerView = view.findViewById(R.id.top_artists_recycler_view);
-        //past_button = view.findViewById(R.id.past_button);
 
         // Set up RecyclerView, adapters, and lists
         artistListLong = new ArrayList<>();

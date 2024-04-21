@@ -88,6 +88,7 @@
         android:layout_marginEnd="31dp"
         android:layout_marginBottom="223dp"
         android:text="Signup"
+        android:backgroundTint="@color/mainGreen"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/passInput" />

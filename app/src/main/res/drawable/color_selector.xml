@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- White color when the icon is not pressed or selected -->
+    <item android:color="#FFFFFFFF" android:state_pressed="false" android:state_selected="false" />
+    <item android:color="#000000" /> <!-- Default color (grey) -->
+
+</selector>

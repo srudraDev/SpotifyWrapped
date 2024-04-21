@@ -23,11 +23,11 @@
         android:layout_width="match_parent"
         android:layout_height="75dp"
         android:background="@color/subGreen"
-        app:itemBackground="@color/subGreen"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
+        app:itemIconTint="@drawable/color_selector"
         app:menu="@menu/bottom_nav"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
