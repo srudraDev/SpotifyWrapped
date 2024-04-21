@@ -1,5 +1,6 @@
 package com.example.spotifywrapped;
 
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,7 +53,26 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
             artistNameTextView.setText(artistName);
             albumNameTextView.setText(albumName);
             artist_rank_textview.setText(String.valueOf(rank));
+            if (rank == 1) {
+                String gold = "#C5B147";
+                rankingColors(gold);
+            }
+            else if (rank == 2) {
+                String silver = "#858584";
+                rankingColors(silver);
+            }
+            else if (rank == 3) {
+                String bronze = "#A15822";
+                rankingColors(bronze);
+            }
         }
+        public void rankingColors(String color) {
+            nameTextView.setTextColor(Color.parseColor(color));
+            artistNameTextView.setTextColor(Color.parseColor(color));
+            albumNameTextView.setTextColor(Color.parseColor(color));
+            artist_rank_textview.setTextColor(Color.parseColor(color));
+        }
+
     }
     @NonNull
     @Override

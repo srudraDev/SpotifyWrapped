@@ -33,33 +33,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="18sp"
+            android:textColor="@color/black"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/additional_details_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/black"
             android:textSize="14sp" />
 
         <TextView
             android:id="@+id/album_name_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/black"
             android:textSize="12sp" />
 
     </LinearLayout>
 
 </LinearLayout>
-<!--
-    <TextView
-        android:id="@+id/artist_name_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_marginStart="8dp"
-        android:layout_toEndOf="@id/artist_image_view"
-        android:layout_centerVertical="true"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
-</RelativeLayout>
--->

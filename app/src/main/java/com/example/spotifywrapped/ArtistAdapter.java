@@ -1,5 +1,8 @@
 package com.example.spotifywrapped;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -61,6 +65,23 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistView
             artistNameTextView.setText(artistName);
             artistGenresTextView.setText(artistGenres);
             artist_rank_textview.setText(String.valueOf(rank));
+            if (rank == 1) {
+                String gold = "#C5B147";
+                rankingColors(gold);
+            }
+            else if (rank == 2) {
+                String silver = "#858584";
+                rankingColors(silver);
+            }
+            else if (rank == 3) {
+                String bronze = "#A15822";
+                rankingColors(bronze);
+            }
+        }
+        public void rankingColors(String color) {
+            artistNameTextView.setTextColor(Color.parseColor(color));
+            artistGenresTextView.setTextColor(Color.parseColor(color));
+            artist_rank_textview.setTextColor(Color.parseColor(color));
         }
     }
 }
