@@ -261,6 +261,7 @@ public class HomeFragment extends Fragment {
                             .addOnFailureListener(e ->
                                     Log.w(TAG, "Error updating user data", e)
                             );
+                    checkFirebase();
                 } catch (JSONException e) {
                     Log.d("JSON", "Failed to parse data: " + e);
                 }
