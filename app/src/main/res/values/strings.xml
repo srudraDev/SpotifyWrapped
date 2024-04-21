@@ -7,7 +7,7 @@
     <string name="next">Next</string>
     <string name="previous">Previous</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="welcome3">Here, you can view your most listened to artists and tracks from this month, the past six months, or from all time! There\'s also an AI generated description of your music tastes!</string>
+    <string name="welcome3">Here\'s what you can do:\n- View your most listened to artists and tracks\n- Click on the tracks and listen to a preview of the song\n- Get an AI summary of your listening habits</string>
     <string name="welcome2">Welcome To Your Spotify Wrapped!</string>
     <string name="welcome">Hello there!</string>
 </resources>

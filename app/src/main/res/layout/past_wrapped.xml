@@ -15,7 +15,6 @@
         android:layout_marginStart="4dp"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="4dp"
-        android:onClick="settings_btn_click"
         android:drawableBottom="@drawable/ic_gear"
         android:background="#00000000"
         app:layout_constraintStart_toEndOf="@+id/refresh_btn"

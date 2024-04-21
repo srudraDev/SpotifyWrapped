@@ -14,6 +14,7 @@ public class MainActivity extends AppCompatActivity
         .OnNavigationItemSelectedListener {
 
     BottomNavigationView bottomNavigationView;
+    private boolean isLoadingData = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -35,6 +36,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        if (isLoadingData) {
+            return false;
+        }
         if (item.getItemId() == R.id.home) {
             getSupportFragmentManager()
                     .beginTransaction()
@@ -64,7 +68,8 @@ public class MainActivity extends AppCompatActivity
     }
     public void settings_btn_click(View view) {
         startActivity(new Intent(this, SettingsPage.class));
-
-        //finish();
+    }
+    public void setLoadingData(boolean loading) {
+        isLoadingData = loading;
     }
 }

@@ -40,11 +40,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/welcomeMessage" />
 
+    <Button
+        android:id="@+id/link_spotify_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="42dp"
+        android:backgroundTint="#206A3A"
+        android:text="Link Your Spotify Account"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/welcomeMessage3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/welcomeMessage2" />
+
     <TextView
         android:id="@+id/welcomeMessage3"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="44dp"
+        android:layout_marginTop="96dp"
         android:fontFamily="casual"
         android:gravity="center"
         android:text="@string/welcome3"
@@ -70,6 +82,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/welcomeMessage"
         app:layout_constraintVertical_bias="0.961" />
+
+    <TextView
+        android:id="@+id/loading"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="casual"
+        android:gravity="center"
+        android:text="Your Profile is Loading!"
+        android:textColor="@android:color/black"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/welcomeMessage"
+        app:layout_constraintVertical_bias="0.92" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

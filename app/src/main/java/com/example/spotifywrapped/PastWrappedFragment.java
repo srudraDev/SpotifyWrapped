@@ -133,17 +133,17 @@ public class PastWrappedFragment extends Fragment {
                 Log.d("RECYCLER", "ATTEMPTING FILL");
                 switch (position) {
                     case 0:
-                        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                            mediaPlayer.stop();
+                        if (mediaPlayer != null) {
+                            mediaPlayer.release();
                         }
                         // Load data for top 10 artists Medium
                         recyclerView.setAdapter(artistAdapterMedium);
                         break;
                     case 1:
-                        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                            mediaPlayer.stop();
+                        if (mediaPlayer == null) {
+                            mediaPlayer = new MediaPlayer();
+                            mediaPlayer.start();
                         }
-                        mediaPlayer = new MediaPlayer();
                         // Load data for top 10 tracks Medium
                         recyclerView.setAdapter(trackAdapterMedium);
                         trackAdapterMedium.setOnItemClickListener(positionV -> {
@@ -154,11 +154,9 @@ public class PastWrappedFragment extends Fragment {
                             if (clickedTrack.getPreviewUrl() != null) {
                                 Log.d("TEST", "Song: " + clickedTrack + " Url: " + clickedTrack.getPreviewUrl());
                                 if (mediaPlayer.isPlaying() && clickedTrack.equals(currentlyPlayingTrack)) {
-                                    // If a preview URL exists, play the song clip
-                                    mediaPlayer.stop();
+                                    mediaPlayer.pause();
                                 } else {
-                                    mediaPlayer.stop();
-                                    mediaPlayer = new MediaPlayer();
+                                    mediaPlayer.reset();
                                     playSongClip(clickedTrack.getPreviewUrl(), mediaPlayer);
                                     currentlyPlayingTrack = clickedTrack;
                                 }
@@ -171,17 +169,17 @@ public class PastWrappedFragment extends Fragment {
                         });
                         break;
                     case 2:
-                        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                            mediaPlayer.stop();
+                        if (mediaPlayer != null) {
+                            mediaPlayer.release();
                         }
                         // Load data for top 10 artists Long
                         recyclerView.setAdapter(artistAdapterLong);
                         break;
                     case 3:
-                        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                            mediaPlayer.stop();
+                        if (mediaPlayer == null) {
+                            mediaPlayer = new MediaPlayer();
+                            mediaPlayer.start();
                         }
-                        mediaPlayer = new MediaPlayer();
                         // Load data for top 10 tracks Long
                         recyclerView.setAdapter(trackAdapterLong);
                         trackAdapterLong.setOnItemClickListener(positionV -> {
@@ -193,10 +191,9 @@ public class PastWrappedFragment extends Fragment {
                                 Log.d("TEST", "Song: " + clickedTrack + " Url: " + clickedTrack.getPreviewUrl());
                                 if (mediaPlayer.isPlaying() && clickedTrack.equals(currentlyPlayingTrack)) {
                                     // If a preview URL exists, play the song clip
-                                    mediaPlayer.stop();
+                                    mediaPlayer.pause();
                                 } else {
-                                    mediaPlayer.stop();
-                                    mediaPlayer = new MediaPlayer();
+                                    mediaPlayer.reset();
                                     playSongClip(clickedTrack.getPreviewUrl(), mediaPlayer);
                                     currentlyPlayingTrack = clickedTrack;
                                 }
@@ -246,8 +243,8 @@ public class PastWrappedFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
         }
     }
 

@@ -55,7 +55,6 @@ import okhttp3.Response;
 public class WrappedFragment extends Fragment {
 
     private ActivityResultLauncher<Intent> spotifyAuthLauncher;
-
     public static String mAccessToken;
     public static final OkHttpClient mOkHttpClient = new OkHttpClient();
     // Firebase
@@ -127,15 +126,18 @@ public class WrappedFragment extends Fragment {
                 // Handle item selection
                 switch (position) {
                     case 0:
-                        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                            mediaPlayer.stop();
+                        if (mediaPlayer != null) {
+                            mediaPlayer.release();
                         }
                         // Load data for top 10 artists
                         recyclerView.setAdapter(artistAdapter);
                         break;
                     case 1:
+                        if (mediaPlayer == null) {
+                            mediaPlayer = new MediaPlayer();
+                            mediaPlayer.start();
+                        }
                         // Load data for top 10 tracks
-                        mediaPlayer = new MediaPlayer();
                         recyclerView.setAdapter(trackAdapter);
 
                         trackAdapter.setOnItemClickListener(positionV -> {
@@ -146,11 +148,9 @@ public class WrappedFragment extends Fragment {
                             // Check if the clicked track has a preview URL
                             if (clickedTrack != null && clickedTrack.getPreviewUrl() != null) {
                                 if (mediaPlayer.isPlaying() && clickedTrack.equals(currentlyPlayingTrack)) {
-                                    // If a preview URL exists, play the song clip
-                                    mediaPlayer.stop();
+                                    mediaPlayer.pause();
                                 } else {
-                                    mediaPlayer.stop();
-                                    mediaPlayer = new MediaPlayer();
+                                    mediaPlayer.reset();
                                     playSongClip(clickedTrack.getPreviewUrl(), mediaPlayer);
                                     currentlyPlayingTrack = clickedTrack;
                                 }
@@ -201,8 +201,8 @@ public class WrappedFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
         }
     }
 
