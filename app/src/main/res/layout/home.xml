@@ -44,7 +44,7 @@
         android:id="@+id/link_spotify_btn"
         android:layout_width="wrap_content"
         android:layout_height="42dp"
-        android:backgroundTint="#206A3A"
+        android:backgroundTint="@color/mainGreen"
         android:text="Link Your Spotify Account"
         android:textColor="@color/black"
         app:layout_constraintBottom_toTopOf="@+id/welcomeMessage3"

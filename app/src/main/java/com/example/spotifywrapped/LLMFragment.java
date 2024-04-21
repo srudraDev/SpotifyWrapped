@@ -93,7 +93,7 @@ public class LLMFragment extends Fragment {
                     String responseBody = response.body().string();
                     try {
                         final JSONObject jsonObject = new JSONObject(responseBody);
-                        assistant = jsonObject.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content");
+                        assistant = " " + jsonObject.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content");
                         Log.d("assistant", assistant);
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
