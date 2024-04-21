@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -53,7 +54,7 @@ public class HomeFragment extends Fragment {
     private FirebaseFirestore db;
     private String username;
     private final Handler handler = new Handler();
-    private boolean isLoadingData = false;
+    private boolean wasLoadingData = false;
     private View view;
 
     @Override
@@ -92,7 +93,12 @@ public class HomeFragment extends Fragment {
             Log.d("TOKEN", "GET TOKEN");
             Intent intent = getToken(requireActivity());
             spotifyAuthLauncher.launch(intent);
+            TextView loadingTextView = view.findViewById(R.id.loading);
+            loadingTextView.setVisibility(View.VISIBLE);
         });
+
+        TextView loadingTextView = view.findViewById(R.id.loading);
+        loadingTextView.setVisibility(View.INVISIBLE);
 
         return view;
     }
@@ -103,22 +109,21 @@ public class HomeFragment extends Fragment {
         handler.removeCallbacks(dataLoadingRunnable);
     }
 
-    // Method to initiate data loading
-    private void startLoadingData() {
-        setLoading(true); // Set loading state
-        handler.postDelayed(dataLoadingRunnable, 5000); // Start periodic data loading
-    }
-
     private void setLoading(boolean loading) {
-        isLoadingData = loading;
         // Access MainActivity and set loading state
         MainActivity mainActivity = (MainActivity) requireActivity();
         mainActivity.setLoadingData(loading);
+        if (loading) {
+            wasLoadingData = true;
+        }
         // Access text views and update visibility based on loading state
-        TextView loadingTextView = view.findViewById(R.id.loading);
-        TextView getStartedTextView = view.findViewById(R.id.getStarted);
-        loadingTextView.setVisibility(loading ? View.VISIBLE : View.INVISIBLE);
-        getStartedTextView.setVisibility(loading ? View.INVISIBLE : View.VISIBLE);
+        getActivity().runOnUiThread(() -> {
+            // Access text views and update visibility based on loading state
+            TextView loadingTextView = view.findViewById(R.id.loading);
+            TextView getStartedTextView = view.findViewById(R.id.getStarted);
+            loadingTextView.setVisibility(loading ? View.VISIBLE : View.INVISIBLE);
+            getStartedTextView.setVisibility(loading ? View.INVISIBLE : View.VISIBLE);
+        });
     }
 
     private final Runnable dataLoadingRunnable = new Runnable() {
@@ -154,8 +159,14 @@ public class HomeFragment extends Fragment {
                     // Change the name in home if the user has one
                     TextView welcomeMessage = view.findViewById(R.id.welcomeMessage);
                     if (username != null) {
-                        welcomeMessage.setText("Hello " + username + "!");
-                        setLoading(false);
+                        getActivity().runOnUiThread(() -> {
+                            welcomeMessage.setText("Hello " + username + "!");
+                            setLoading(false); // Update UI component
+                            if (wasLoadingData) {
+                                Toast.makeText(requireContext(), "Loading Success!", Toast.LENGTH_SHORT).show();
+                                wasLoadingData = false;
+                            }
+                        });
                     }
                 } catch (Exception e) {
                     Log.d("LOAD ERROR", "USERNAME NOT FOUND");
