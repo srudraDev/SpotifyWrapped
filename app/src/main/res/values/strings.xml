@@ -12,4 +12,6 @@
     <string name="welcome">Hello there!</string>
     <string name="your_ai_summary">Your AI Summary</string>
     <string name="here_s_how_it_works">Here\'s how it works:\n- We send your top 3 genres to an LLM\n- It fills in our template\n- And returns a tasteful description of you and your music!</string>
+    <string name="edit_account_information">Edit Account Information</string>
+    <string name="delete_your_account">Delete Your Account</string>
 </resources>

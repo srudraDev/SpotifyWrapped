@@ -101,6 +101,9 @@ public class PastWrappedFragment extends Fragment {
         typeSpinner.setAdapter(adapter);
         recyclerView = view.findViewById(R.id.top_artists_recycler_view);
 
+        Button settings = view.findViewById(R.id.settings_button);
+        settings.setOnClickListener(v -> startActivity(new Intent(requireContext(), SettingsPage.class)));
+
         // Set up RecyclerView, adapters, and lists
         artistListLong = new ArrayList<>();
         trackListLong = new ArrayList<>();

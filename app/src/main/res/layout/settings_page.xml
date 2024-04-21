@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -8,40 +9,64 @@
     android:background="@color/backGreen2"
     android:id="@+id/linear"
     >
+
     <Button
+        android:id="@+id/button"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:backgroundTint="@color/mainGreen"
-        android:layout_marginTop="4dp"
         android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:backgroundTint="@color/mainGreen"
         android:drawableTop="@drawable/arrow_back_24"
-        android:onClick="return_from_settings" />
+        android:onClick="return_from_settings"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/view" />
+
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:id="@+id/delete_btn"
-        android:text="Delete Your Account"
-        android:layout_marginBottom="5dp"
-        android:drawableEnd="@drawable/delete_24"
-        android:backgroundTint="@color/mainGreen"
-        android:onClick="before_confirm_delete" />
-
-    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:id="@+id/edit_btn"
+        android:layout_marginTop="44dp"
         android:backgroundTint="@color/mainGreen"
-        android:text="Edit Account Information"
-        android:drawableEnd="@drawable/edit_24"
+        android:drawableEnd="@drawable/delete_24"
+        android:onClick="before_confirm_delete"
+        android:text="@string/delete_your_account"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button" />
 
-        android:onClick="edit_account_button"/>
+    <Button
+        android:id="@+id/edit_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="44dp"
+        android:backgroundTint="@color/mainGreen"
+        android:drawableEnd="@drawable/edit_24"
+        android:onClick="edit_account_button"
+        android:text="@string/edit_account_information"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/delete_btn" />
+
+    <Button
+        android:id="@+id/logout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="44dp"
+        android:backgroundTint="@color/mainGreen"
+        android:text="Logout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edit_btn" />
 
     <View
+        android:id="@+id/view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"/>
+        android:layout_weight="1" />
 
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

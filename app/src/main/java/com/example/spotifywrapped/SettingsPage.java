@@ -41,6 +41,11 @@ public class SettingsPage extends AppCompatActivity {
         myDialog = new Dialog(this);
         Objects.requireNonNull(myDialog.getWindow()).setLayout(width, height);
         myDialog.setContentView(R.layout.edit_account);
+
+        Button logout = findViewById(R.id.logout);
+        logout.setOnClickListener(v -> {
+            startActivity(new Intent(this, LoginActivity.class));
+        });
     }
 
 

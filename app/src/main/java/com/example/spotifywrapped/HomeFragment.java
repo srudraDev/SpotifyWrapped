@@ -55,6 +55,9 @@ public class HomeFragment extends Fragment {
     private String username;
     private final Handler handler = new Handler();
     private boolean wasLoadingData = false;
+    private TextView loadingTextView;
+    private TextView getStartedTextView;
+    private Button linkSpotifyBtn;
     private View view;
 
     @Override
@@ -67,8 +70,14 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.home, container, false);
 
+        linkSpotifyBtn = view.findViewById(R.id.link_spotify_btn);
+
         firebaseAuth = FirebaseAuth.getInstance();
         checkFirebase();
+
+        loadingTextView = view.findViewById(R.id.loading);
+        loadingTextView.setVisibility(View.INVISIBLE);
+        getStartedTextView = view.findViewById(R.id.getStarted);
 
         // Send the user to spotify login screen if they do not have an account (launched by linkSpotifyBtn)
         spotifyAuthLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
@@ -82,23 +91,21 @@ public class HomeFragment extends Fragment {
                         if (response != null) {
                             mAccessToken = response.getAccessToken();
                             getUserProfile();
+                            username = null;
+                            loadingTextView = view.findViewById(R.id.loading);
+                            loadingTextView.setVisibility(View.VISIBLE);
+                            getStartedTextView.setVisibility(View.INVISIBLE);
                         }
                     }
                 });
 
-        Button linkSpotifyBtn = view.findViewById(R.id.link_spotify_btn);
         // Gets the token for the user and primes the spotifyAuthLauncher
         linkSpotifyBtn.setOnClickListener(v -> {
             // Call getToken() to link Spotify
             Log.d("TOKEN", "GET TOKEN");
             Intent intent = getToken(requireActivity());
             spotifyAuthLauncher.launch(intent);
-            TextView loadingTextView = view.findViewById(R.id.loading);
-            loadingTextView.setVisibility(View.VISIBLE);
         });
-
-        TextView loadingTextView = view.findViewById(R.id.loading);
-        loadingTextView.setVisibility(View.INVISIBLE);
 
         return view;
     }
@@ -119,10 +126,14 @@ public class HomeFragment extends Fragment {
         // Access text views and update visibility based on loading state
         getActivity().runOnUiThread(() -> {
             // Access text views and update visibility based on loading state
-            TextView loadingTextView = view.findViewById(R.id.loading);
-            TextView getStartedTextView = view.findViewById(R.id.getStarted);
+            loadingTextView = view.findViewById(R.id.loading);
+            getStartedTextView = view.findViewById(R.id.getStarted);
             loadingTextView.setVisibility(loading ? View.VISIBLE : View.INVISIBLE);
             getStartedTextView.setVisibility(loading ? View.INVISIBLE : View.VISIBLE);
+            if (username != null) {
+                linkSpotifyBtn.setVisibility(View.INVISIBLE);
+                linkSpotifyBtn.setEnabled(false);
+            }
         });
     }
 
