@@ -71,7 +71,6 @@ public class WrappedFragment extends Fragment {
     private List<top10Tracks> trackList;
     // counters
     private int loadCounter = 0;
-    private static boolean isAccountDeleted = false;
     // song stuff
     private MediaPlayer mediaPlayer;
     private top10Tracks currentlyPlayingTrack;
@@ -94,6 +93,10 @@ public class WrappedFragment extends Fragment {
 
         // Initialize Refresh Button
         Button linkSpotifyBtn = view.findViewById(R.id.link_spotify_btn);
+
+        // Initialize Settings Button
+        Button settings = view.findViewById(R.id.settings_btn);
+        settings.setOnClickListener(v -> startActivity(new Intent(requireContext(), SettingsPage.class)));
 
         // Initialize Spinner
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.spinner_item, getResources().getStringArray(R.array.typeOfWrapped));
