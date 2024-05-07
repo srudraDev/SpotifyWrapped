@@ -15,7 +15,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class top10Tracks extends top10Items{
+public class top10Tracks extends top10Items {
 
     private final String artistName;
     private final String albumName;
@@ -39,11 +39,10 @@ public class top10Tracks extends top10Items{
         this.previewUrl = previewUrl;
     }
     public static class TrackFetcher extends Fetcher<top10Tracks> {
-        private final String timeRange;
         private final OkHttpClient mOkHttpClient;
         private final String mAccessToken;
-        public TrackFetcher (String timeRange, String accessToken, OkHttpClient okHttpClient) {
-            this.timeRange = timeRange;
+        public TrackFetcher(String timeRange, String accessToken, OkHttpClient okHttpClient) {
+            super(timeRange);
             this.mAccessToken = accessToken;
             this.mOkHttpClient = okHttpClient;
         }
@@ -55,16 +54,18 @@ public class top10Tracks extends top10Items{
             List<top10Tracks> wantedData = new ArrayList<>();
             JSONArray items = json.getJSONArray("items");
             if (items.length() == 0) {
-                wantedData.add(new top10Tracks("You have no tracks! Listen to some and come back later", null, null, null, null) {
+                wantedData.add(new top10Tracks("You have no tracks! Listen to some and come back later",
+                        null, null, null, null) {
                 });
                 return wantedData;
             }
             for (int i = 0; i < items.length(); i++) {
                 JSONObject individual = items.getJSONObject(i);
                 String name = individual.getString("name");
-                String secondImageUrl = individual.getJSONObject("album").getJSONArray("images").getJSONObject(1).getString("url");
+                String secondImageUrl = individual.getJSONObject("album").getJSONArray("images").
+                        getJSONObject(1).getString("url");
                 String albumName = individual.getJSONObject("album").getString("name");
-                String artistName = "";
+                String artistName;
                 JSONArray artistInfo = individual.getJSONArray("artists");
                 artistName = artistInfo.getJSONObject(0).getString("name");
                 if (artistInfo.length() > 1) {

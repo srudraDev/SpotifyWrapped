@@ -20,20 +20,46 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
     private final List<top10Tracks> trackList;
     private OnItemClickListener listener;
 
-    public interface OnItemClickListener {
-        void onItemClick(int position);
-    }
+    @Override
+    public void onBindViewHolder(@NonNull TrackViewHolder holder, int position) {
+        Log.d("SONG", "BIND HOLDER CALLED: " + position);
+        String trackName = trackList.get(position).getName();
+        String artistName = trackList.get(position).getArtistName();
+        String albumName = trackList.get(position).getAlbumName();
+        Glide.with(holder.trackImageView.getContext())
+                .load(trackList.get(position).getSecondImageUrl())
+                .into(holder.trackImageView);
+        holder.bind(trackName, artistName, albumName, position + 1);
 
-    public TrackAdapter(List<top10Tracks> trackList) {
-        this.trackList = trackList;
+        // Set onclick listener
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(position);
+            }
+        });
     }
-
+    @NonNull
+    @Override
+    public TrackViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_artist, parent, false);
+        return new TrackViewHolder(view);
+    }
     public void setOnItemClickListener(OnItemClickListener listener) {
         Log.d("SONG", "SET LISTENER");
         this.listener = listener;
     }
+    @Override
+    public int getItemCount() {
+        return trackList.size();
+    }
+    public TrackAdapter(List<top10Tracks> trackList) {
+        this.trackList = trackList;
+    }
+    public interface OnItemClickListener {
+        void onItemClick(int position);
+    }
 
-    static class TrackViewHolder extends RecyclerView.ViewHolder {
+    public static class TrackViewHolder extends RecyclerView.ViewHolder {
         private final TextView nameTextView;
         private final TextView artistNameTextView;
         private final TextView albumNameTextView;
@@ -56,53 +82,19 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.TrackViewHol
             if (rank == 1) {
                 String gold = "#C5B147";
                 rankingColors(gold);
-            }
-            else if (rank == 2) {
+            } else if (rank == 2) {
                 String silver = "#858584";
                 rankingColors(silver);
-            }
-            else if (rank == 3) {
+            } else if (rank == 3) {
                 String bronze = "#A15822";
                 rankingColors(bronze);
             }
         }
-        public void rankingColors(String color) {
+        private void rankingColors(String color) {
             nameTextView.setTextColor(Color.parseColor(color));
             artistNameTextView.setTextColor(Color.parseColor(color));
             albumNameTextView.setTextColor(Color.parseColor(color));
             artist_rank_textview.setTextColor(Color.parseColor(color));
         }
-
     }
-    @NonNull
-    @Override
-    public TrackViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_artist, parent, false);
-        return new TrackViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull TrackViewHolder holder, int position) {
-        Log.d("SONG", "BIND HOLDER CALLED: " + position);
-        String trackName = trackList.get(position).getName();
-        String artistName = trackList.get(position).getArtistName();
-        String albumName = trackList.get(position).getAlbumName();
-        Glide.with(holder.trackImageView.getContext())
-                .load(trackList.get(position).getSecondImageUrl())
-                .into(holder.trackImageView);
-        holder.bind(trackName, artistName, albumName, position + 1);
-
-        // Set onclick listener
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onItemClick(position);
-            }
-        });
-    }
-
-    @Override
-    public int getItemCount() {
-        return trackList.size();
-    }
-
 }

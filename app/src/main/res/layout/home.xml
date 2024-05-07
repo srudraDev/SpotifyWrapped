@@ -12,7 +12,6 @@
         android:id="@+id/welcomeMessage"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
         android:fontFamily="casual"
         android:gravity="center"
         android:text="@string/welcome"
@@ -20,7 +19,6 @@
         android:textSize="44sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.504"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.112" />
@@ -29,14 +27,15 @@
         android:id="@+id/welcomeMessage2"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginBottom="-30dp"
         android:fontFamily="casual"
         android:gravity="center"
         android:text="@string/welcome2"
         android:textColor="@android:color/black"
-        android:textSize="32sp"
+        android:textSize="28sp"
+        app:layout_constraintBottom_toTopOf="@+id/link_spotify_btn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.504"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/welcomeMessage" />
 
@@ -45,18 +44,20 @@
         android:layout_width="wrap_content"
         android:layout_height="42dp"
         android:backgroundTint="@color/mainGreen"
+        android:layout_marginBottom="-25dp"
         android:text="Link Your Spotify Account"
         android:textColor="@color/black"
         app:layout_constraintBottom_toTopOf="@+id/welcomeMessage3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/welcomeMessage2" />
+        app:layout_constraintTop_toBottomOf="@+id/welcomeMessage2"
+        app:layout_constraintVertical_bias="0.5" />
 
     <TextView
         android:id="@+id/welcomeMessage3"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="96dp"
+        android:layout_marginTop="90dp"
         android:fontFamily="casual"
         android:gravity="center"
         android:text="@string/welcome3"
@@ -98,6 +99,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/welcomeMessage"
         app:layout_constraintVertical_bias="0.92" />
+
+    <ImageView
+        android:id="@+id/profilePic"
+        android:layout_width="95dp"
+        android:layout_height="98dp"
+        app:layout_constraintBottom_toTopOf="@+id/welcomeMessage2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/welcomeMessage"
+        app:layout_constraintVertical_bias="1.0"
+        android:visibility="invisible"
+        tools:src="@tools:sample/avatars" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

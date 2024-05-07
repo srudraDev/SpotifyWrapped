@@ -2,10 +2,9 @@ package com.example.spotifywrapped;
 
 import static android.content.ContentValues.TAG;
 
-import static com.example.spotifywrapped.pullSpotifyDataToDatabase.cancelCall;
-import static com.example.spotifywrapped.pullSpotifyDataToDatabase.getToken;
+import static com.example.spotifywrapped.UtilitySpotifyFeatureMethods.*;
 import static com.example.spotifywrapped.pullSpotifyDataToDatabase.mCall;
-
+import static com.example.spotifywrapped.pullSpotifyDataToDatabase.db;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,19 +15,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
 import org.json.JSONArray;
@@ -43,7 +42,6 @@ import java.util.Map;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.Response;
 
 public class HomeFragment extends Fragment {
@@ -51,19 +49,19 @@ public class HomeFragment extends Fragment {
     public static String mAccessToken;
     public static final OkHttpClient mOkHttpClient = new OkHttpClient();
     private FirebaseAuth firebaseAuth;
-    private FirebaseFirestore db;
     private String username;
     private final Handler handler = new Handler();
     private boolean wasLoadingData = false;
     private TextView loadingTextView;
     private TextView getStartedTextView;
     private Button linkSpotifyBtn;
+    private ImageView profilePic;
+    private String profilePicURL;
     private View view;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        db = FirebaseFirestore.getInstance();
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -74,6 +72,7 @@ public class HomeFragment extends Fragment {
 
         firebaseAuth = FirebaseAuth.getInstance();
         checkFirebase();
+        profilePic = view.findViewById(R.id.profilePic);
 
         loadingTextView = view.findViewById(R.id.loading);
         loadingTextView.setVisibility(View.INVISIBLE);
@@ -85,7 +84,8 @@ public class HomeFragment extends Fragment {
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         Intent data = result.getData();
                         // Call the method from pullSpotifyDataToDatabase to retrieve the authorization response
-                        AuthorizationResponse response = pullSpotifyDataToDatabase.getSpotifyAuthResponse(result.getResultCode(), data);
+                        AuthorizationResponse response = pullSpotifyDataToDatabase.
+                                getSpotifyAuthResponse(result.getResultCode(), data);
 
                         // Check if the response is present
                         if (response != null) {
@@ -100,12 +100,7 @@ public class HomeFragment extends Fragment {
                 });
 
         // Gets the token for the user and primes the spotifyAuthLauncher
-        linkSpotifyBtn.setOnClickListener(v -> {
-            // Call getToken() to link Spotify
-            Log.d("TOKEN", "GET TOKEN");
-            Intent intent = getToken(requireActivity());
-            spotifyAuthLauncher.launch(intent);
-        });
+        refreshLinkSpotify(spotifyAuthLauncher, linkSpotifyBtn, requireActivity());
 
         return view;
     }
@@ -150,7 +145,7 @@ public class HomeFragment extends Fragment {
         setLoading(username == null);
     }
 
-    public void getUserName() {
+    private void getUserName() {
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         assert currentUser != null;
         String userID = currentUser.getUid();
@@ -165,12 +160,16 @@ public class HomeFragment extends Fragment {
                 // Document exists, extract the data
                 // Assuming the structure of your document is similar to how you parsed the Spotify API response
                 try {
-                    // Get artist and track arrays from firebase
                     username = (String) documentSnapshot.get("displayName");
+                    profilePicURL = (String) documentSnapshot.get("profilePic");
                     // Change the name in home if the user has one
                     TextView welcomeMessage = view.findViewById(R.id.welcomeMessage);
                     if (username != null) {
                         getActivity().runOnUiThread(() -> {
+                            Glide.with(this)
+                                    .load(profilePicURL)
+                                    .into(profilePic);
+                            profilePic.setVisibility(View.VISIBLE);
                             welcomeMessage.setText("Hello " + username + "!");
                             setLoading(false); // Update UI component
                             if (wasLoadingData) {
@@ -192,22 +191,8 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    public void getUserProfile() {
-        Log.d("GET USER", "GET USER PROFILE");
-
-        if (mAccessToken == null) {
-            Log.d("GET USER ERROR", "NO ACCESS TOKEN");
-            return;
-        }
-
-        // Create a request to get the user profile
-        final Request request = new Request.Builder()
-                .url("https://api.spotify.com/v1/me")
-                .addHeader("Authorization", "Bearer " + mAccessToken)
-                .build();
-        cancelCall();
-        mCall = mOkHttpClient.newCall(request);
-
+    private void getUserProfile() {
+        requestUserProfile(mAccessToken, mOkHttpClient);
         mCall.enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -271,18 +256,7 @@ public class HomeFragment extends Fragment {
                     user.put("TracksLong10", parsedLongTracksData);
                     user.put("profilePic", userProfileImageURL);
 
-                    // Get Current User id from FireBase
-                    firebaseAuth = FirebaseAuth.getInstance();
-                    FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-                    assert currentUser != null;
-                    String userID = currentUser.getUid(); // Will never be null (must have account to log in)
-
-                    // Update firebase data with new user data
-                    db.collection("users").document(userID)
-                            .update(user)
-                            .addOnFailureListener(e ->
-                                    Log.w(TAG, "Error updating user data", e)
-                            );
+                    getAndUpdateFromFirebase(db, user);
                     checkFirebase();
                 } catch (JSONException e) {
                     Log.d("JSON", "Failed to parse data: " + e);

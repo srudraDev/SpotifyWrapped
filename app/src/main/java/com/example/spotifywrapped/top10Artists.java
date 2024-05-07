@@ -10,7 +10,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class top10Artists extends top10Items{
+public class top10Artists extends top10Items {
     private final List<String> genres;
 
     public top10Artists(String name, List<String> genres, String secondImageUrl) {
@@ -21,9 +21,8 @@ public class top10Artists extends top10Items{
         return genres;
     }
     public static class ArtistFetcher extends Fetcher<top10Artists> {
-        private final String timeRange;
         public ArtistFetcher(String timeRange) {
-            this.timeRange = timeRange;
+            super(timeRange);
         }
         @Override
         protected String getEndpoint() {
@@ -55,6 +54,5 @@ public class top10Artists extends top10Items{
             Log.d("parseJSON", wantedData.get(0).name);
             return wantedData;
         }
-
     }
 }

@@ -1,8 +1,8 @@
 package com.example.spotifywrapped;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -30,7 +30,7 @@ public class SettingsPage extends AppCompatActivity {
     private EditText confirmedPassword;
     private DatabaseReference reference;
 
-    @SuppressLint("MissingInflatedId")
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +44,10 @@ public class SettingsPage extends AppCompatActivity {
 
         Button logout = findViewById(R.id.logout);
         logout.setOnClickListener(v -> {
+            SharedPreferences preferences = getSharedPreferences("checkbox", MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString("remember", "false");
+            editor.apply();
             startActivity(new Intent(this, LoginActivity.class));
         });
     }

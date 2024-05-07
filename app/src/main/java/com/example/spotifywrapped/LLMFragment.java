@@ -2,6 +2,7 @@ package com.example.spotifywrapped;
 
 import static android.content.ContentValues.TAG;
 import static com.example.spotifywrapped.secret.openAI_key;
+import static com.example.spotifywrapped.pullSpotifyDataToDatabase.db;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -24,9 +25,7 @@ import androidx.fragment.app.Fragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -40,39 +39,39 @@ public class LLMFragment extends Fragment {
     private TextView aiResponse;
     private String prompt_genre = "";
     private String assistant = "";
-
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     public LLMFragment() {
         // Required empty public constructor
     }
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.personality_ai, container, false);
 
         aiResponse = view.findViewById(R.id.response);
-        if (assistant.isEmpty())
+        if (assistant.isEmpty()) {
             genreRetrieval();
-        else
+        } else {
             aiResponse.setText(assistant);
+        }
         return view;
     }
 
 
-    public void makePersonalityRequest(String genre) {
+    private void makePersonalityRequest(String genre) {
         Log.d("genre", genre);
         String url = "https://api.openai.com/v1/chat/completions";
         String prompt = "What would my personality be based on the genres of music I listen to listed below? (Respond in 50 words) " + genre;
 
-        String requestBody = "{" +
-                "\"model\": \"gpt-3.5-turbo\"," +
-                "\"messages\": [" +
-                "{\"role\":\"system\", \"content\": \"" + prompt + "\"}," +
-                "{\"role\": \"user\", \"content\": \"Hello!\"}" +
-                "]}";
+        String requestBody = "{"
+                + "\"model\": \"gpt-3.5-turbo\","
+                + "\"messages\": ["
+                + "{\"role\":\"system\", \"content\": \"" + prompt + "\"},"
+                + "{\"role\": \"user\", \"content\": \"Hello!\"}"
+                + "]}";
 
         MediaType mediaType = MediaType.parse("application/json");
-        RequestBody body =  RequestBody.create(mediaType,requestBody);
+        RequestBody body =  RequestBody.create(mediaType, requestBody);
         final Request request = new Request.Builder()
                 .url(url)
                 .post(body)
@@ -88,12 +87,12 @@ public class LLMFragment extends Fragment {
             }
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                Log.d("TAG", "ARE YOU RUNNING");
                 if (response.isSuccessful()) {
                     String responseBody = response.body().string();
                     try {
                         final JSONObject jsonObject = new JSONObject(responseBody);
-                        assistant = " " + jsonObject.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content");
+                        assistant = " " + jsonObject.getJSONArray("choices").getJSONObject(0)
+                                .getJSONObject("message").getString("content");
                         Log.d("assistant", assistant);
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -113,7 +112,7 @@ public class LLMFragment extends Fragment {
             }
         });
     }
-    public void genreRetrieval() {
+    private void genreRetrieval() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = auth.getCurrentUser();
         String userID = currentUser.getUid();
@@ -123,7 +122,7 @@ public class LLMFragment extends Fragment {
             if (documentSnapshot.exists()) {
                 try {
                     // Get artist and track arrays from firebase
-                    List<Map<String,Object>> Artists10 = (List<Map<String, Object>>) documentSnapshot.get("Artists10");
+                    List<Map<String, Object>> Artists10 = (List<Map<String, Object>>) documentSnapshot.get("Artists10");
                     for (int i = 0; i < 4; i++) {
                         ArrayList<String> genres = (ArrayList<String>) Artists10.get(i).get("genres");
                         if (!genres.isEmpty()) {

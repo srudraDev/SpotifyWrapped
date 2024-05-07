@@ -1,9 +1,10 @@
 package com.example.spotifywrapped;
 
 import static android.content.ContentValues.TAG;
+import static com.example.spotifywrapped.UtilitySpotifyFeatureMethods.*;
 import static com.example.spotifywrapped.pullSpotifyDataToDatabase.cancelCall;
-import static com.example.spotifywrapped.pullSpotifyDataToDatabase.getToken;
 import static com.example.spotifywrapped.pullSpotifyDataToDatabase.mCall;
+import static com.example.spotifywrapped.pullSpotifyDataToDatabase.db;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -31,7 +32,6 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
 import org.json.JSONArray;
@@ -47,7 +47,6 @@ import java.util.Map;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.Response;
 
 public class PastWrappedFragment extends Fragment {
@@ -58,7 +57,6 @@ public class PastWrappedFragment extends Fragment {
     public static final OkHttpClient mOkHttpClient = new OkHttpClient();
     // Firebase
     private FirebaseAuth firebaseAuth;
-    private FirebaseFirestore db;
     // Views
     private RecyclerView recyclerView;
     private Spinner typeSpinner;
@@ -72,12 +70,9 @@ public class PastWrappedFragment extends Fragment {
     private List<top10Tracks> trackListMedium;
     private List<top10Artists> artistListLong;
     private List<top10Tracks> trackListLong;
-    // counters
-    private int loadCounter = 0;
     // song stuff
     private MediaPlayer mediaPlayer;
     private top10Tracks currentlyPlayingTrack;
-
     public PastWrappedFragment() {
         // Required empty public constructor
     }
@@ -85,7 +80,6 @@ public class PastWrappedFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        db = FirebaseFirestore.getInstance();
     }
 
     @Override
@@ -97,14 +91,15 @@ public class PastWrappedFragment extends Fragment {
         // Initialize views and variables
         Button linkSpotifyBtn = view.findViewById(R.id.refresh_btn);
         typeSpinner = view.findViewById(R.id.time_frame_spinner);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.spinner_item, getResources().getStringArray(R.array.time_frames));
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.spinner_item,
+                getResources().getStringArray(R.array.time_frames));
         typeSpinner.setAdapter(adapter);
-        recyclerView = view.findViewById(R.id.top_artists_recycler_view);
-
-        Button settings = view.findViewById(R.id.settings_button);
+        Button settings = view.findViewById(R.id.settings_btn);
         settings.setOnClickListener(v -> startActivity(new Intent(requireContext(), SettingsPage.class)));
+        shareButtonListener(view, getContext());
 
         // Set up RecyclerView, adapters, and lists
+        recyclerView = view.findViewById(R.id.top_artists_recycler_view);
         artistListLong = new ArrayList<>();
         trackListLong = new ArrayList<>();
         artistListMedium = new ArrayList<>();
@@ -114,13 +109,11 @@ public class PastWrappedFragment extends Fragment {
         artistAdapterLong = new ArtistAdapter(artistListLong);
         trackAdapterLong = new TrackAdapter(trackListLong);
         // Automatically sets RV to artists
-        initiateRecyclerView(recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
 
         /*
           Get data from FireBase and attempt to load profile. Will call GetUserProfile if
           data is not fully available in FireBase
-          Also loads data for the other pages. Since this page pops up first, it will prime
-          the others for usage
         */
         Log.d("LOAD", "CALLING LOAD DATA");
         loadData();
@@ -158,7 +151,7 @@ public class PastWrappedFragment extends Fragment {
                                     mediaPlayer.pause();
                                 } else {
                                     mediaPlayer.reset();
-                                    playSongClip(clickedTrack.getPreviewUrl(), mediaPlayer);
+                                    playSongClip(clickedTrack.getPreviewUrl(), mediaPlayer, requireContext());
                                     currentlyPlayingTrack = clickedTrack;
                                 }
                             } else {
@@ -196,7 +189,7 @@ public class PastWrappedFragment extends Fragment {
                                     mediaPlayer.pause();
                                 } else {
                                     mediaPlayer.reset();
-                                    playSongClip(clickedTrack.getPreviewUrl(), mediaPlayer);
+                                    playSongClip(clickedTrack.getPreviewUrl(), mediaPlayer, requireContext());
                                     currentlyPlayingTrack = clickedTrack;
                                 }
                             } else {
@@ -211,17 +204,16 @@ public class PastWrappedFragment extends Fragment {
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-                // Do nothing
             }
         });
-
         // Send the user to spotify login screen if they do not have an account (launched by linkSpotifyBtn)
         spotifyAuthLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         Intent data = result.getData();
                         // Call the method from pullSpotifyDataToDatabase to retrieve the authorization response
-                        AuthorizationResponse response = pullSpotifyDataToDatabase.getSpotifyAuthResponse(result.getResultCode(), data);
+                        AuthorizationResponse response = pullSpotifyDataToDatabase.
+                                getSpotifyAuthResponse(result.getResultCode(), data);
 
                         // Check if the response is present
                         if (response != null) {
@@ -230,15 +222,8 @@ public class PastWrappedFragment extends Fragment {
                         }
                     }
                 });
-
         // Gets the token for the user and primes the spotifyAuthLauncher
-        linkSpotifyBtn.setOnClickListener(v -> {
-            // Call getToken() to link Spotify
-            Log.d("TOKEN", "GET TOKEN");
-            Intent intent = getToken(requireActivity());
-            spotifyAuthLauncher.launch(intent);
-        });
-
+        refreshLinkSpotify(spotifyAuthLauncher, linkSpotifyBtn, requireActivity());
         return view;
     }
 
@@ -254,26 +239,11 @@ public class PastWrappedFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        initiateRecyclerView(recyclerView);
         loadData();
     }
 
-    public void getUserProfile() {
-        Log.d("GET USER", "GET USER PROFILE");
-
-        if (mAccessToken == null) {
-            Log.d("GET USER ERROR", "NO ACCESS TOKEN");
-            return;
-        }
-
-        // Create a request to get the user profile
-        final Request request = new Request.Builder()
-                .url("https://api.spotify.com/v1/me")
-                .addHeader("Authorization", "Bearer " + mAccessToken)
-                .build();
-        cancelCall();
-        mCall = mOkHttpClient.newCall(request);
-
+    private void getUserProfile() {
+        requestUserProfile(mAccessToken, mOkHttpClient);
         mCall.enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -295,7 +265,6 @@ public class PastWrappedFragment extends Fragment {
 
                     // Set User data
                     String displayName = jsonObject.getString("display_name");
-                    String spotifyUserId = jsonObject.getString("id");
                     String userProfileImageURL;
                     try {
                         JSONArray userProfileImageArray = jsonObject.getJSONArray("images");
@@ -305,10 +274,8 @@ public class PastWrappedFragment extends Fragment {
                         Log.d("PROFILE IMAGE", "NO PROFILE IMAGE FOUND");
                     }
 
+                    Map<String, Object> user = new HashMap<>();
                     // Set User Artist data
-                    top10Artists.ArtistFetcher shortArtistFetcher = new top10Artists.ArtistFetcher("short_term");
-                    List<top10Artists> parsedShortArtistData = shortArtistFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
-
                     top10Artists.ArtistFetcher mediumArtistFetcher = new top10Artists.ArtistFetcher("medium_term");
                     List<top10Artists> parsedMediumArtistData = mediumArtistFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
 
@@ -316,9 +283,6 @@ public class PastWrappedFragment extends Fragment {
                     List<top10Artists> parsedLongArtistData = longArtistFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
 
                     // Set User Tracks data
-                    top10Tracks.TrackFetcher shortTrackFetcher = new top10Tracks.TrackFetcher("short_term", mAccessToken, mOkHttpClient);
-                    List<top10Tracks> parsedShortTracksData = shortTrackFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
-
                     top10Tracks.TrackFetcher mediumTrackFetcher = new top10Tracks.TrackFetcher("medium_term", mAccessToken, mOkHttpClient);
                     List<top10Tracks> parsedMediumTracksData = mediumTrackFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
 
@@ -326,29 +290,14 @@ public class PastWrappedFragment extends Fragment {
                     List<top10Tracks> parsedLongTracksData = longTrackFetcher.fetchTop10Items(mAccessToken, mOkHttpClient);
 
                     // Put all the user data in a HashMap
-                    Map<String, Object> user = new HashMap<>();
                     user.put("displayName", displayName);
-                    user.put("spotifyId", spotifyUserId);
-                    user.put("Artists10", parsedShortArtistData);
-                    user.put("Tracks10", parsedShortTracksData);
                     user.put("ArtistsMedium10", parsedMediumArtistData);
                     user.put("TracksMedium10", parsedMediumTracksData);
                     user.put("ArtistsLong10", parsedLongArtistData);
                     user.put("TracksLong10", parsedLongTracksData);
                     user.put("profilePic", userProfileImageURL);
 
-                    // Get Current User id from FireBase
-                    firebaseAuth = FirebaseAuth.getInstance();
-                    FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-                    assert currentUser != null;
-                    String userID = currentUser.getUid(); // Will never be null (must have account to log in)
-
-                    // Update firebase data with new user data
-                    db.collection("users").document(userID)
-                            .update(user)
-                            .addOnFailureListener(e ->
-                                    Log.w(TAG, "Error updating user data", e)
-                            );
+                    getAndUpdateFromFirebase(db, user);
                     // Load new Firebase data
                     loadData();
                 } catch (JSONException e) {
@@ -358,7 +307,7 @@ public class PastWrappedFragment extends Fragment {
         });
     }
 
-    public void loadData() {
+    private void loadData() {
         try {
             // Get Current User id from FireBase
             firebaseAuth = FirebaseAuth.getInstance();
@@ -388,7 +337,7 @@ public class PastWrappedFragment extends Fragment {
                         artistListLong = setArtists(ArtistsLong10);
                         trackListLong = setTracks(TracksLong10);
 
-                        if (artistListLong == null|| trackListLong == null || artistListMedium == null || trackListMedium == null) {
+                        if (artistListLong == null || trackListLong == null || artistListMedium == null || trackListMedium == null) {
                             throw new java.lang.IllegalArgumentException("artistList or trackList is null");
                         }
 
@@ -397,18 +346,10 @@ public class PastWrappedFragment extends Fragment {
                         trackAdapterMedium = new TrackAdapter(trackListMedium);
                         trackAdapterLong = new TrackAdapter(trackListLong);
 
-                        typeSpinner.setVisibility(View.VISIBLE);
-
                         typeSpinner.setSelection(0);
                         recyclerView.setAdapter(artistAdapterMedium);
                     } catch (Exception e) {
-                        System.out.println(loadCounter);
-                        if (loadCounter < 10) {
-                            getUserProfile();
-                            loadCounter++;
-                        } else {
-                            Log.d("LOAD ERROR", "ATTEMPTED TO LOAD MORE THAN 10 TIMES");
-                        }
+                        Log.d("loadData", "Document data retrieval error");
                     }
                 } else {
                     // Document does not exist
@@ -421,58 +362,6 @@ public class PastWrappedFragment extends Fragment {
         } catch (Exception e) {
             Log.d("LOAD", "MAJOR LOAD ERROR: " + e);
         }
-    }
-
-    public void initiateRecyclerView(RecyclerView rv) {
-        recyclerView = rv.findViewById(R.id.top_artists_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
-    }
-
-    public List<top10Artists> setArtists(List<Map<String, Object>> ArtistList) {
-        List<top10Artists> newArtistList = new ArrayList<>();
-        for (Map<String, Object> artistData : ArtistList) {
-            String artistName = (String) artistData.get("name");
-            List<String> genres = (List<String>) artistData.get("genres");
-            String imageUrl = (String) artistData.get("secondImageUrl");
-
-            top10Artists newArtist = new top10Artists(artistName, genres, imageUrl);
-            newArtistList.add(newArtist);
-        }
-        return newArtistList;
-    }
-
-    public List<top10Tracks> setTracks(List<Map<String, Object>> TrackList) {
-        List<top10Tracks> newTrackList = new ArrayList<>();
-        for (Map<String, Object> trackData : TrackList) {
-            String name = (String) trackData.get("name");
-            String artistName = (String) trackData.get("artistName");
-            String albumName = (String) trackData.get("albumName");
-            String imageUrl = (String) trackData.get("secondImageUrl");
-            String previewUrl = (String) trackData.get("previewUrl");
-
-            top10Tracks newTrack = new top10Tracks(name, artistName, albumName, imageUrl, previewUrl);
-            newTrackList.add(newTrack);
-        }
-        return newTrackList;
-    }
-
-    private void playSongClip(String previewUrl, MediaPlayer mediaPlayer) {
-        try {
-            mediaPlayer.setDataSource(previewUrl);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-        } catch (IOException e) {
-            Toast.makeText(requireContext(), "Preview not available", Toast.LENGTH_SHORT).show();
-            Log.d("SONG", "SONG FAILED TO PLAY");
-        }
-
-        // Optionally, you may want to release the MediaPlayer after the clip finishes playing
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                mediaPlayer.release();
-            }
-        });
     }
 
     @Override

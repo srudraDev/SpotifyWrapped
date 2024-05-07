@@ -1,9 +1,7 @@
 package com.example.spotifywrapped;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,14 +9,13 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity
         implements BottomNavigationView
-        .OnNavigationItemSelectedListener {
+        .OnItemSelectedListener {
 
     BottomNavigationView bottomNavigationView;
     private boolean isLoadingData = false;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -26,7 +23,7 @@ public class MainActivity extends AppCompatActivity
                 = findViewById(R.id.bottomNavigationView);
                 
         bottomNavigationView
-                .setOnNavigationItemSelectedListener(this);
+                .setOnItemSelectedListener(this);
         bottomNavigationView.setSelectedItemId(R.id.home);
     }
     HomeFragment firstFragment = new HomeFragment();
@@ -65,9 +62,6 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
         return false;
-    }
-    public void settings_btn_click(View view) {
-        startActivity(new Intent(this, SettingsPage.class));
     }
     public void setLoadingData(boolean loading) {
         isLoadingData = loading;

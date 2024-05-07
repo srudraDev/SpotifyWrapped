@@ -4,7 +4,6 @@ import static com.example.spotifywrapped.pullSpotifyDataToDatabase.db;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -27,7 +26,7 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText passInput;
     private Button signupButton;
     private TextView toLogin;
-    public static String userID;
+    private static String userID;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,23 +34,15 @@ public class SignUpActivity extends AppCompatActivity {
 
         userInput = findViewById(R.id.userInput);
         passInput = findViewById(R.id.passInput);
-        signupButton = findViewById(R.id.signupButton);
-        toLogin = findViewById(R.id.toLogin);
+        signupButton = findViewById(R.id.authButton);
+        toLogin = findViewById(R.id.changePage);
 
         firebaseAuth = FirebaseAuth.getInstance();
 
-        signupButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                signupUser();
-            }
-        });
-        toLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
-                startActivity(intent);
-            }
+        signupButton.setOnClickListener(v -> signupUser());
+        toLogin.setOnClickListener(v -> {
+            Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
+            startActivity(intent);
         });
     }
     private void signupUser() {
@@ -76,7 +67,8 @@ public class SignUpActivity extends AppCompatActivity {
                                     startActivity(intent);
                                 })
                                 .addOnFailureListener(e -> {
-                                    Toast.makeText(SignUpActivity.this, "Failed to save user data.", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(SignUpActivity.this,
+                                            "Failed to save user data.", Toast.LENGTH_SHORT).show();
                                 });
                     }
                 } else {

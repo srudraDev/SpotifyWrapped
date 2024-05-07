@@ -2,7 +2,6 @@ package com.example.spotifywrapped;
 
 import android.util.Log;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -33,6 +32,10 @@ public abstract class top10Items {
 
     public abstract static class Fetcher<T extends top10Items> {
         protected abstract String getEndpoint();
+        String timeRange;
+        public Fetcher(String timeRange) {
+            this.timeRange = timeRange;
+        }
 
         public List<T> fetchTop10Items(String mAccessToken, OkHttpClient mOkHttpClient) throws IOException {
             List<T> parsedData = new ArrayList<>();
